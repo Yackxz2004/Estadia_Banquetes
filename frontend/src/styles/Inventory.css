@@ -1,0 +1,36 @@
+.inventory-page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.inventory-content {
+  padding: 2rem;
+  text-align: center;
+  flex-grow: 1;
+}
+
+.inventory-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.action-button:hover {
+  background-color: #0056b3;
+}

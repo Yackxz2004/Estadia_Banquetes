@@ -1,0 +1,139 @@
+/* Container for the whole page */
+div {
+  font-family: Arial, sans-serif;
+}
+
+/* Styles for the posts section */
+.posts-section {
+  margin-bottom: 2rem;
+}
+
+.posts-section h2 {
+  color: #333;
+  font-size: 24px;
+}
+
+/* Styles for individual posts - assuming your posts component has some container element */
+.post {
+  background-color: #f9f9f9;
+  border-left: 5px solid #007bff;
+  margin: 10px 0;
+  padding: 10px 15px;
+  border-radius: 5px;
+}
+
+/* Styles for the form section */
+form {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  margin: auto;
+}
+
+form h2 {
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+form label {
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+form input,
+form textarea {
+  width: 100%;
+  padding: 8px;
+  margin: 8px 0 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+form input[type="submit"] {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+form input[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+:root {
+  --primary-color: #ffffff;
+  --secondary-color: #f0f0f0;
+  --text-color: #333;
+  --font-family: 'Serif', 'Times New Roman', Times, serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+}
+
+.home-container {
+  text-align: center;
+}
+
+.hero-section {
+  height: 100vh;
+  background: url('https://images.unsplash.com/photo-1551632436-cbf8935414d5?q=80&w=2071&auto=format&fit=crop') no-repeat center center/cover; /* Reemplazar con la imagen real */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--primary-color);
+  position: relative;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-content h1 {
+  font-size: 2rem;
+  font-weight: normal;
+  letter-spacing: 0.2em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.hero-content .brand-name {
+  font-size: 8rem;
+  font-family: 'Great Vibes', cursive; /* Se necesita una fuente caligráfica, esto es un ejemplo */
+  margin: -20px 0 0 0;
+}
+
+.content-section {
+  padding: 100px 20px;
+  min-height: 400px;
+}
+
+.content-section:nth-child(odd) {
+  background-color: var(--primary-color);
+}
+
+.content-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}

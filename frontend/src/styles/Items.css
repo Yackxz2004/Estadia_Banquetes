@@ -1,0 +1,45 @@
+.items-container {
+  padding: 2rem;
+  text-align: center;
+  position: relative; /* Needed for absolute positioning of the back button */
+}
+
+.back-link-items {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  display: inline-block;
+  padding: 0.8rem 1.5rem;
+  background-color: #6c757d;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.back-link-items:hover {
+  background-color: #5a6268;
+}
+
+.crud-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.crud-link {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background-color: #28a745;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 1.2rem;
+  transition: background-color 0.3s ease;
+}
+
+.crud-link:hover {
+  background-color: #218838;
+}
