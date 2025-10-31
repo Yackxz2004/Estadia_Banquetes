@@ -44,6 +44,10 @@ class MantenimientoMixin:
         item.cantidad_en_mantenimiento += cantidad_a_mantenimiento
         item.save()
 
+        # Crear notificación
+        message = f"Han ingresado al mantenimiento {cantidad_a_mantenimiento} {item.producto}."
+        Notification.objects.create(message=message)
+
         return Response({'status': 'success', 'message': f'{cantidad_a_mantenimiento} unidades enviadas a mantenimiento.'}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'])
@@ -61,6 +65,10 @@ class MantenimientoMixin:
         item.cantidad_en_mantenimiento -= cantidad_a_reintegrar
         item.cantidad += cantidad_a_reintegrar
         item.save()
+
+        # Crear notificación
+        message = f"Han salido del mantenimiento {cantidad_a_reintegrar} {item.producto}."
+        Notification.objects.create(message=message)
 
         return Response({'status': 'success', 'message': f'{cantidad_a_reintegrar} unidades reintegradas al stock.'}, status=status.HTTP_200_OK)
 
