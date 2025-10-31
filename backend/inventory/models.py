@@ -148,6 +148,10 @@ class Evento(models.Model):
                             item_asignado.content_object.save()
                     # Elimina la relación de mobiliario para no devolverlo de nuevo
                     self.mobiliario_asignado.all().delete()
+
+                    if self.estado == 'Finalizado':
+                        message = f"El evento '{self.nombre}' en '{self.lugar}' ha terminado."
+                        Notification.objects.create(message=message)
             except Evento.DoesNotExist:
                 pass  # El objeto es nuevo, no hay nada que comparar
 
@@ -223,3 +227,11 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+class Notification(models.Model):
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.message

@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     TipoEventoViewSet, BodegaViewSet, ClienteViewSet, ManteleriaViewSet, CubiertoViewSet, LozaViewSet, 
     CristaleriaViewSet, SillaViewSet, MesaViewSet, SalaLoungeViewSet, PeriqueraViewSet, CarpaViewSet, 
-    PistaTarimaViewSet, ExtraViewSet, EventoViewSet, ContentTypeViewSet, DegustacionViewSet, ProductViewSet, CalendarDataAPIView
+    PistaTarimaViewSet, ExtraViewSet, EventoViewSet, ContentTypeViewSet, DegustacionViewSet, ProductViewSet, CalendarDataAPIView, NotificationViewSet
 )
 
 router = DefaultRouter()
@@ -25,6 +25,7 @@ router.register(r'eventos', EventoViewSet, basename='evento')
 router.register(r'degustaciones', DegustacionViewSet, basename='degustacion')
 router.register(r'content-types', ContentTypeViewSet, basename='content-type')
 router.register(r'products', ProductViewSet, basename='product')
+router.register(r'notifications', NotificationViewSet, basename='notification')
 
 urlpatterns = [
     path('', include(router.urls)),
