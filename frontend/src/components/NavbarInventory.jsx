@@ -35,6 +35,7 @@ const NavbarInventory = () => {
                 </li>
                 <li><Link to="/inventory/calendar">Calendario</Link></li>
                 <li><Link to="/inventory/reports">Reportes</Link></li>
+                <li><Link to="/inventory/backup">Respaldo</Link></li>
             </ul>
         </nav>
     );
