@@ -4,13 +4,29 @@ from rest_framework import serializers, viewsets, filters, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.conf import settings
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, HttpResponse # Combinamos HttpResponse aquí
 from django.db import connection
 from django.db import transaction
+
+# 💡 Importación ÚNICA Y CORRECTA de datetime
+from datetime import datetime, timedelta 
+
+import unidecode
+from io import BytesIO
+from openpyxl import Workbook
+from reportlab.pdfgen import canvas # Asegúrate de tener estas importaciones si las usas abajo
+from reportlab.lib.pagesizes import letter 
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib import colors
+import openpyxl 
+from openpyxl.styles import Font, Alignment
+
 from django.contrib.contenttypes.models import ContentType
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from datetime import datetime, timedelta
+
+# Importaciones de Modelos y Serializadores (Se mantienen al final)
 from .models import (
     TipoEvento, Bodega, Cliente, Manteleria, Cubierto, Loza, Cristaleria, Silla, Mesa, SalaLounge, 
     Periquera, Carpa, PistaTarima, Extra, Evento, EventoMobiliario, Degustacion, DegustacionMobiliario, Product, Notification
@@ -428,51 +444,127 @@ from openpyxl.styles import Font, Alignment
 class InventoryUsageReportView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def generate_test_excel(self):
+        """Genera un archivo Excel de prueba directamente."""
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Reporte de Prueba"
+        
+        # ... (Tus cabeceras y datos de prueba) ...
+        
+        # 1. Crear un buffer en memoria (BytesIO)
+        output = BytesIO()
+        
+        # 2. Guardar el workbook en el buffer
+        wb.save(output)
+        
+        # 3. Mover el puntero al inicio del buffer
+        output.seek(0)
+
+        # 4. Generar la respuesta HTTP desde el buffer
+        response = HttpResponse(
+            output.read(), # Leemos el contenido binario del buffer
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        # Clave para la descarga: Cabecera Content-Disposition
+        response['Content-Disposition'] = 'attachment; filename="reporte_de_prueba.xlsx"'
+        return response
+        
+    
+    # --- MÉTODO GET MODIFICADO ---
     def get(self, request, *args, **kwargs):
+        # Parámetros para la descarga de reportes
         report_format = request.query_params.get('format')
         event_id = request.query_params.get('event_id')
 
-        # --- Logic for downloading a specific event report ---
+        # Parámetros para el listado de eventos
+        start_date_str = request.query_params.get('start_date')
+        end_date_str = request.query_params.get('end_date')
+
+        # 🎯 CASO 1: PRUEBA DE DESCARGA (Test endpoint)
+        if 'new-report-download' in request.path:
+            return self.generate_test_excel()
+        
+        # -----------------------------------------------------
+
+        # 🎯 CASO 2: DESCARGAR UN REPORTE DE EVENTO ESPECÍFICO (reports/download/)
         if report_format and event_id:
             try:
                 evento = Evento.objects.get(pk=event_id)
                 if report_format == 'pdf':
+                    # Llama a tu función de generación de PDF
                     return self.generate_pdf(evento)
                 elif report_format == 'excel':
+                    # Llama a tu función de generación de Excel
                     return self.generate_excel(evento)
                 else:
-                    return Response({"error": "Invalid format"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"error": "Formato de reporte no válido."}, status=status.HTTP_400_BAD_REQUEST)
+            
             except Evento.DoesNotExist:
-                return Response({"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"error": f"Evento con ID {event_id} no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
-        # --- Logic for listing events by date range ---
-        start_date_str = request.query_params.get('start_date')
-        end_date_str = request.query_params.get('end_date')
+        # -----------------------------------------------------
 
-        if not start_date_str or not end_date_str:
-            return Response({"error": "start_date and end_date parameters are required."}, status=status.HTTP_400_BAD_REQUEST)
+        # 🎯 CASO 3: LISTAR EVENTOS POR RANGO DE FECHAS (reports/)
+        elif start_date_str and end_date_str:
+            try:
+                # Intenta convertir las cadenas de fecha
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+                
+            except ValueError as e:
+                # 🛑 Devuelve 400 Bad Request si la conversión falla (solución al error anterior)
+                print(f"ERROR AL PARSEAR FECHAS: {e}")
+                return Response({
+                    "error": "Formato de fecha inválido. Asegúrate de usar AAAA-MM-DD.",
+                    "detalle": str(e)
+                }, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-        except ValueError:
-            return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+            # Si la conversión fue exitosa:
+            events = Evento.objects.filter(fecha_inicio__range=[start_date, end_date])
+            
+            # Serializa la respuesta para enviarla al frontend
+            serializer = EventoSerializer(events, many=True)
+            return Response(serializer.data)
 
-        events = Evento.objects.filter(fecha_inicio__range=[start_date, end_date])
-        serializer = EventoSerializer(events, many=True)
-        return Response(serializer.data)
+        # -----------------------------------------------------
+
+        # CASO 4: Si no se proporcionaron parámetros suficientes/válidos
+        return Response({
+            "error": "Parámetros incorrectos. Se requiere 'start_date' y 'end_date' o 'format' y 'event_id'."
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     def generate_pdf(self, evento):
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="reporte_evento_{evento.nombre}.pdf"'
+        # 1. PREPARAR EL NOMBRE DEL ARCHIVO SEGURO
+        
+        # Eliminamos acentos, tildes, y caracteres problemáticos del nombre del evento
+        # para que el nombre de archivo sea compatible con la mayoría de los sistemas.
+        # Esto previene errores de codificación complejos en la cabecera.
+        import unidecode
+        
+        # Usamos unidecode para simplificar caracteres (ej: Evento Día Ñ -> Evento Dia N)
+        clean_name = unidecode.unidecode(evento.nombre).replace(" ", "_").replace("/", "-")
+        base_filename = f"reporte_evento_{clean_name}.pdf"
 
+        # 2. GENERAR LA RESPUESTA HTTP Y CABECERAS (CRÍTICO)
+        response = HttpResponse(content_type='application/pdf')
+        
+        # Codificamos la cabecera 'Content-Disposition' con latin-1, el estándar de Django
+        # para asegurar que los navegadores manejen correctamente los nombres de archivo no-ASCII.
+        response['Content-Disposition'] = f'attachment; filename="{base_filename}"'.encode('latin-1', errors='replace').decode('latin-1')
+        
+        # 3. GENERACIÓN DEL CONTENIDO DEL PDF CON REPORTLAB
+        
         doc = SimpleDocTemplate(response, pagesize=letter)
         styles = getSampleStyleSheet()
         story = []
 
+        # Título y detalles
         story.append(Paragraph(f"Reporte de Uso de Inventario", styles['Title']))
         story.append(Spacer(1, 12))
 
+        # Nota: Usar 'Normal' con <b> funciona, pero si hay problemas de codificación 
+        # o fuentes en ReportLab, es mejor mantener el texto simple.
         story.append(Paragraph(f"<b>Nombre del Evento:</b> {evento.nombre}", styles['Normal']))
         story.append(Paragraph(f"<b>Tipo de Evento:</b> {evento.tipo_evento.nombre if evento.tipo_evento else 'N/A'}", styles['Normal']))
         story.append(Paragraph(f"<b>Responsable:</b> {evento.responsable}", styles['Normal']))
@@ -482,6 +574,7 @@ class InventoryUsageReportView(APIView):
 
         story.append(Paragraph("Inventario Utilizado", styles['h2']))
         
+        # Datos de la tabla
         mobiliario_data = [['Producto', 'Descripción', 'Cantidad']]
         for item in evento.mobiliario_asignado.all():
             mobiliario_data.append([

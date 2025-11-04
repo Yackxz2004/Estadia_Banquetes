@@ -28,7 +28,7 @@ import DegustacionForm from "./components/DegustacionForm";
 import Products from "./pages/Products";
 import ProductForm from "./components/ProductForm";
 import Calendario from "./pages/Calendario";
-import Reports from "./pages/Reports";
+import Reports from "./components/Reports";
 import Notifications from "./pages/Notifications";
 import BackupPage from "./pages/BackupPage";
 
