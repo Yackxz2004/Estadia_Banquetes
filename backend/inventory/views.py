@@ -432,7 +432,7 @@ class CalendarDataAPIView(APIView):
         return Response(serializer.data)
 
 
-from django.http import HttpResponse
+from django.http import JsonResponse, HttpResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
@@ -440,6 +440,45 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib import colors
 import openpyxl
 from openpyxl.styles import Font, Alignment
+
+class LowStockInventoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """
+        Returns a list of all inventory items with stock below 25 units.
+        """
+        # Define the inventory models to check
+        inventory_models = [
+            Manteleria, Cubierto, Loza, Cristaleria, Silla,
+            Mesa, SalaLounge, Periquera, Carpa, PistaTarima, Extra
+        ]
+
+        low_stock_items = []
+
+        for model in inventory_models:
+            # Get all items with stock below 25
+            items = model.objects.filter(cantidad__lt=25).select_related('bodega')
+
+            for item in items:
+                low_stock_items.append({
+                    'id': item.id,
+                    'categoria': model._meta.verbose_name_plural.title(),
+                    'nombre': item.producto,
+                    'descripcion': item.descripcion,
+                    'cantidad_actual': item.cantidad,
+                    'stock_minimo': 25,  # Default minimum stock level
+                    'bodega_id': item.bodega.id if item.bodega else None,
+                    'bodega_nombre': item.bodega.nombre if item.bodega else 'No especificada',
+                    'tipo': model.__name__.lower()
+                })
+
+        # Sort by category and then by current quantity (ascending)
+        low_stock_items.sort(key=lambda x: (x['categoria'], x['cantidad_actual']))
+
+        return Response(low_stock_items)
+
+        
 
 class InventoryUsageReportView(APIView):
     permission_classes = [IsAuthenticated]
