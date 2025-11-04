@@ -32,6 +32,18 @@ class InventarioItem(models.Model):
     def __str__(self):
         return f"{self.producto} - Disp: {self.cantidad} / Mant: {self.cantidad_en_mantenimiento}"
 
+    def save(self, *args, **kwargs):
+        if self.pk is not None:
+            try:
+                old_item = self.__class__.objects.get(pk=self.pk)
+                if old_item.cantidad >= 10 and self.cantidad < 10:
+                    message = f"¡Alerta de bajo stock! El artículo '{self.producto}' tiene actualmente {self.cantidad} unidades. ¡Requiere reabastecimiento urgente!"
+                    Notification.objects.create(message=message)
+            except self.__class__.DoesNotExist:
+                pass  # El objeto es nuevo, no hay nada que comparar
+
+        super().save(*args, **kwargs)
+
 
 class Cliente(models.Model):
     nombre = models.CharField(max_length=100)
@@ -134,24 +146,31 @@ class Evento(models.Model):
         return self.nombre
 
     def save(self, *args, **kwargs):
-        # Si el evento ya existe, verifica si el estado cambió
-        if self.pk:
+        is_new = self.pk is None  # Comprobar si el objeto es nuevo
+
+        # Lógica de actualización para eventos existentes
+        if not is_new:
             try:
                 evento_anterior = Evento.objects.get(pk=self.pk)
-                # Si el estado anterior no era 'Finalizado' o 'Cancelado' y el nuevo sí lo es
                 if evento_anterior.estado not in ['Finalizado', 'Cancelado'] and self.estado in ['Finalizado', 'Cancelado']:
-                    # Itera sobre el mobiliario asignado y devuelve las cantidades al stock
                     for item_asignado in self.mobiliario_asignado.all():
-                        # Asegurarse de que content_object no sea None
                         if item_asignado.content_object:
                             item_asignado.content_object.cantidad += item_asignado.cantidad
                             item_asignado.content_object.save()
-                    # Elimina la relación de mobiliario para no devolverlo de nuevo
                     self.mobiliario_asignado.all().delete()
-            except Evento.DoesNotExist:
-                pass  # El objeto es nuevo, no hay nada que comparar
 
-        super().save(*args, **kwargs)  # Llama al método save original
+                    if self.estado == 'Finalizado':
+                        message = f"El evento '{self.nombre}' en '{self.lugar}' ha terminado."
+                        Notification.objects.create(message=message)
+            except Evento.DoesNotExist:
+                pass
+
+        super().save(*args, **kwargs)  # Guardar el objeto
+
+        # Crear notificación para nuevos eventos
+        if is_new and self.estado == 'Por iniciar':
+            message = f"Nuevo pedido creado: Evento '{self.nombre}', Fecha: {self.fecha_inicio.strftime('%d/%m/%Y')}, Lugar: {self.lugar}."
+            Notification.objects.create(message=message)
 
 class EventoMobiliario(models.Model):
     evento = models.ForeignKey(Evento, related_name='mobiliario_asignado', on_delete=models.CASCADE)
@@ -198,6 +217,10 @@ class Degustacion(models.Model):
                             item_asignado.content_object.cantidad += item_asignado.cantidad
                             item_asignado.content_object.save()
                     self.mobiliario_asignado.all().delete()
+
+                    if self.estado == 'Finalizado':
+                        message = f"La degustación del evento '{self.nombre}' ha finalizado."
+                        Notification.objects.create(message=message)
             except Degustacion.DoesNotExist:
                 pass
 
@@ -223,3 +246,11 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+class Notification(models.Model):
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.message

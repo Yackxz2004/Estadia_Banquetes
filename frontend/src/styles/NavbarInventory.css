@@ -26,6 +26,7 @@
 
 .inventory-navbar-links li a:hover {
   color: #adb5bd; /* Lighter color on hover */
+  background-color: #555;
 }
 
 .inventory-navbar-links li a::after {

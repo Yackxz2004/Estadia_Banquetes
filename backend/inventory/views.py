@@ -1,6 +1,11 @@
+import os
+import shutil
 from rest_framework import serializers, viewsets, filters, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from django.conf import settings
+from django.http import FileResponse, Http404
+from django.db import connection
 from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
 from rest_framework.permissions import IsAuthenticated
@@ -8,13 +13,13 @@ from rest_framework.views import APIView
 from datetime import datetime, timedelta
 from .models import (
     TipoEvento, Bodega, Cliente, Manteleria, Cubierto, Loza, Cristaleria, Silla, Mesa, SalaLounge, 
-    Periquera, Carpa, PistaTarima, Extra, Evento, EventoMobiliario, Degustacion, DegustacionMobiliario, Product
+    Periquera, Carpa, PistaTarima, Extra, Evento, EventoMobiliario, Degustacion, DegustacionMobiliario, Product, Notification
 )
 from .serializers import (
     TipoEventoSerializer, BodegaSerializer, ClienteSerializer, ManteleriaSerializer, CubiertoSerializer, 
     LozaSerializer, CristaleriaSerializer, SillaSerializer, MesaSerializer, SalaLoungeSerializer, 
     PeriqueraSerializer, CarpaSerializer, PistaTarimaSerializer, ExtraSerializer, EventoSerializer, DegustacionSerializer,
-    ProductSerializer, CalendarActivitySerializer
+    ProductSerializer, CalendarActivitySerializer, NotificationSerializer
 )
 
 class TipoEventoViewSet(viewsets.ModelViewSet):
@@ -44,6 +49,10 @@ class MantenimientoMixin:
         item.cantidad_en_mantenimiento += cantidad_a_mantenimiento
         item.save()
 
+        # Crear notificación
+        message = f"Han ingresado al mantenimiento {cantidad_a_mantenimiento} {item.producto}."
+        Notification.objects.create(message=message)
+
         return Response({'status': 'success', 'message': f'{cantidad_a_mantenimiento} unidades enviadas a mantenimiento.'}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'])
@@ -61,6 +70,10 @@ class MantenimientoMixin:
         item.cantidad_en_mantenimiento -= cantidad_a_reintegrar
         item.cantidad += cantidad_a_reintegrar
         item.save()
+
+        # Crear notificación
+        message = f"Han salido del mantenimiento {cantidad_a_reintegrar} {item.producto}."
+        Notification.objects.create(message=message)
 
         return Response({'status': 'success', 'message': f'{cantidad_a_reintegrar} unidades reintegradas al stock.'}, status=status.HTTP_200_OK)
 
@@ -345,6 +358,22 @@ class ProductViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'description', 'colors']
 
 
+class NotificationViewSet(viewsets.ModelViewSet):
+    queryset = Notification.objects.all().order_by('-created_at')
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=['post'])
+    def mark_all_as_read(self, request):
+        Notification.objects.filter(is_read=False).update(is_read=True)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=['post'])
+    def delete_all(self, request):
+        Notification.objects.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class CalendarDataAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -385,3 +414,225 @@ class CalendarDataAPIView(APIView):
 
         serializer = CalendarActivitySerializer(activities, many=True)
         return Response(serializer.data)
+
+
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib import colors
+import openpyxl
+from openpyxl.styles import Font, Alignment
+
+class InventoryUsageReportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        report_format = request.query_params.get('format')
+        event_id = request.query_params.get('event_id')
+
+        # --- Logic for downloading a specific event report ---
+        if report_format and event_id:
+            try:
+                evento = Evento.objects.get(pk=event_id)
+                if report_format == 'pdf':
+                    return self.generate_pdf(evento)
+                elif report_format == 'excel':
+                    return self.generate_excel(evento)
+                else:
+                    return Response({"error": "Invalid format"}, status=status.HTTP_400_BAD_REQUEST)
+            except Evento.DoesNotExist:
+                return Response({"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # --- Logic for listing events by date range ---
+        start_date_str = request.query_params.get('start_date')
+        end_date_str = request.query_params.get('end_date')
+
+        if not start_date_str or not end_date_str:
+            return Response({"error": "start_date and end_date parameters are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+
+        events = Evento.objects.filter(fecha_inicio__range=[start_date, end_date])
+        serializer = EventoSerializer(events, many=True)
+        return Response(serializer.data)
+
+    def generate_pdf(self, evento):
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="reporte_evento_{evento.nombre}.pdf"'
+
+        doc = SimpleDocTemplate(response, pagesize=letter)
+        styles = getSampleStyleSheet()
+        story = []
+
+        story.append(Paragraph(f"Reporte de Uso de Inventario", styles['Title']))
+        story.append(Spacer(1, 12))
+
+        story.append(Paragraph(f"<b>Nombre del Evento:</b> {evento.nombre}", styles['Normal']))
+        story.append(Paragraph(f"<b>Tipo de Evento:</b> {evento.tipo_evento.nombre if evento.tipo_evento else 'N/A'}", styles['Normal']))
+        story.append(Paragraph(f"<b>Responsable:</b> {evento.responsable}", styles['Normal']))
+        story.append(Paragraph(f"<b>Lugar:</b> {evento.lugar}", styles['Normal']))
+        story.append(Paragraph(f"<b>Fecha:</b> {evento.fecha_inicio.strftime('%d/%m/%Y')}", styles['Normal']))
+        story.append(Spacer(1, 24))
+
+        story.append(Paragraph("Inventario Utilizado", styles['h2']))
+        
+        mobiliario_data = [['Producto', 'Descripción', 'Cantidad']]
+        for item in evento.mobiliario_asignado.all():
+            mobiliario_data.append([
+                item.content_object.producto,
+                item.content_object.descripcion,
+                item.cantidad
+            ])
+
+        table = Table(mobiliario_data)
+        style = TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ])
+        table.setStyle(style)
+        story.append(table)
+
+        doc.build(story)
+        return response
+
+    def generate_excel(self, evento):
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="reporte_evento_{evento.nombre}.xlsx"'
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Reporte de Inventario"
+
+        # --- Header ---
+        ws.merge_cells('A1:C1')
+        title_cell = ws['A1']
+        title_cell.value = "Reporte de Uso de Inventario"
+        title_cell.font = Font(bold=True, size=16)
+        title_cell.alignment = Alignment(horizontal='center')
+
+        # --- Event Details ---
+        details = [
+            ("Nombre del Evento:", evento.nombre),
+            ("Tipo de Evento:", evento.tipo_evento.nombre if evento.tipo_evento else 'N/A'),
+            ("Responsable:", evento.responsable),
+            ("Lugar:", evento.lugar),
+            ("Fecha:", evento.fecha_inicio.strftime('%d/%m/%Y'))
+        ]
+        row = 3
+        for label, value in details:
+            ws[f'A{row}'] = label
+            ws[f'A{row}'].font = Font(bold=True)
+            ws[f'B{row}'] = value
+            row += 1
+
+        # --- Inventory Table ---
+        table_header_row = row + 1
+        headers = ["Producto", "Descripción", "Cantidad"]
+        for col_num, header_title in enumerate(headers, 1):
+            cell = ws.cell(row=table_header_row, column=col_num)
+            cell.value = header_title
+            cell.font = Font(bold=True)
+
+        for item in evento.mobiliario_asignado.all():
+            table_header_row += 1
+            ws.cell(row=table_header_row, column=1).value = item.content_object.producto
+            ws.cell(row=table_header_row, column=2).value = item.content_object.descripcion
+            ws.cell(row=table_header_row, column=3).value = item.cantidad
+
+        wb.save(response)
+        return response
+
+
+class BackupCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        # 1. Verificar que estamos usando SQLite (o ajustar si es otro motor)
+        if 'sqlite3' not in settings.DATABASES['default']['ENGINE']:
+            return Response({'error': 'La función de respaldo solo está configurada para SQLite.'}, 
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        db_path = settings.DATABASES['default']['NAME']
+        
+        # 2. Generar un nombre de archivo dinámico
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_filename = f"db_backup_{timestamp}.sqlite3"
+        
+        # 3. Asegurar que la conexión a la base de datos esté cerrada temporalmente (Necesario para copiar SQLite)
+        # Esto es crucial para asegurar una copia consistente de SQLite
+        connection.close() 
+
+        try:
+            # 4. Usar FileResponse para servir el archivo directamente
+            response = FileResponse(
+                open(db_path, 'rb'), 
+                content_type='application/octet-stream'
+            )
+            
+            # 5. Establecer el encabezado Content-Disposition (crucial para la descarga)
+            response['Content-Disposition'] = f'attachment; filename="{backup_filename}"'
+            
+            return response
+            
+        except FileNotFoundError:
+            raise Http404("Archivo de base de datos no encontrado.")
+            
+        finally:
+            # 6. Reabrir la conexión a la base de datos después de la operación
+            connection.ensure_connection()
+
+class BackupRestoreView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        # 1. Obtener el archivo del request (clave 'backup_file' del frontend)
+        uploaded_file = request.FILES.get('backup_file')
+        
+        if not uploaded_file:
+            return Response({'error': 'No se encontró el archivo de respaldo.'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # 2. Configuración de rutas (igual que en BackupCreateView)
+        db_path = settings.DATABASES['default']['NAME']
+        
+        # 3. Guardar el archivo subido en una ubicación temporal
+        temp_dir = settings.BASE_DIR / 'temp_restore'
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_file_path = temp_dir / 'incoming_backup.sqlite3'
+        
+        with open(temp_file_path, 'wb+') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+
+        # 4. CRÍTICO: Cerrar la conexión a la base de datos
+        connection.close() 
+
+        try:
+            # 5. Sobrescribir el archivo de base de datos con el archivo de respaldo
+            shutil.copyfile(temp_file_path, db_path)
+            
+            # 6. Responder éxito
+            return Response({'status': 'Restauración completada exitosamente. Se recomienda recargar el sistema.'}, 
+                            status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # 7. Manejo de errores
+            return Response({'error': f'Error al restaurar la base de datos: {str(e)}'}, 
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        finally:
+            # 8. Reabrir la conexión y limpiar el archivo temporal
+            connection.ensure_connection()
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
