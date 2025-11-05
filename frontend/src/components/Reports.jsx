@@ -34,8 +34,10 @@ const Reports = () => {
   const [inventoryItems, setInventoryItems] = useState([]);
   const [warehouseData, setWarehouseData] = useState(null);
   const [maintenanceItems, setMaintenanceItems] = useState([]);
+  const [eventAnalysisData, setEventAnalysisData] = useState(null);
+  const [selectedPeriod, setSelectedPeriod] = useState('monthly'); // 'monthly', 'quarterly', 'yearly'
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('events'); // 'events', 'inventory', 'warehouse', or 'maintenance'
+  const [activeTab, setActiveTab] = useState('events'); // 'events', 'inventory', 'warehouse', 'maintenance', or 'analysis'
 
   useEffect(() => {
     // Fetch event types
@@ -151,6 +153,27 @@ const Reports = () => {
         }));
         fileName = `inventario_bajo_stock_${new Date().toISOString().split('T')[0]}.xlsx`;
         sheetName = 'Inventario Bajo Stock';
+      } else if (type === 'maintenance') {
+        // Prepare maintenance data for Excel
+        excelData = maintenanceItems.map(item => ({
+          'Categoría': item.categoria,
+          'Nombre': item.nombre,
+          'Cantidad': item.cantidad_en_mantenimiento,
+          'Estado': item.estado,
+          'Bodega': item.bodega_nombre || 'No especificada',
+          'Fecha': item.fecha ? new Date(item.fecha).toLocaleDateString() : 'N/A'
+        }));
+        fileName = `reporte_mantenimiento_${new Date().toISOString().split('T')[0]}.xlsx`;
+        sheetName = 'Reporte Mantenimiento';
+      } else if (type === 'analysis') {
+        // Prepare event analysis data for Excel
+        excelData = eventAnalysisData.periods.map(period => ({
+          'Período': period.period,
+          'Cantidad de Eventos': period.count,
+          'Porcentaje': `${period.percentage}%`
+        }));
+        fileName = `analisis_eventos_${selectedPeriod}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        sheetName = 'Análisis de Eventos';
       } else {
         // Prepare event data for Excel
         excelData = events.map(event => ({
@@ -219,6 +242,27 @@ const Reports = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Fetch event analysis data
+  const fetchEventAnalysis = async (period) => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/api/inventory/items/event-analysis/?period=${period}`);
+      setEventAnalysisData(response.data);
+    } catch (error) {
+      console.error('Error fetching event analysis:', error);
+      alert('Error al cargar el análisis de eventos. Por favor, intente de nuevo.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle period change
+  const handlePeriodChange = (e) => {
+    const newPeriod = e.target.value;
+    setSelectedPeriod(newPeriod);
+    fetchEventAnalysis(newPeriod);
   };
 
   // Generate PDF for warehouse report
@@ -396,6 +440,61 @@ const Reports = () => {
     doc.save(`reporte_mantenimiento_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
+  // Generate PDF for event analysis
+  const generateEventAnalysisPDF = () => {
+    if (!eventAnalysisData || eventAnalysisData.periods.length === 0) return;
+    
+    const doc = new jsPDF();
+    
+    // Title
+    doc.setFontSize(18);
+    doc.text('Análisis de Eventos por Período', 14, 22);
+    doc.setFontSize(12);
+    doc.setTextColor(100);
+    doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 14, 32);
+    const periodLabel = selectedPeriod === 'monthly' ? 'Mensual' : selectedPeriod === 'quarterly' ? 'Trimestral' : 'Anual';
+    doc.text(`Tipo de período: ${periodLabel}`, 14, 40);
+    doc.text(`Total de eventos: ${eventAnalysisData.total_events}`, 14, 48);
+    
+    // Table data
+    const tableColumn = ["Período", "Cantidad", "Porcentaje"];
+    const tableRows = [];
+    
+    eventAnalysisData.periods.forEach(period => {
+      const periodData = [
+        period.period,
+        period.count.toString(),
+        `${period.percentage}%`
+      ];
+      tableRows.push(periodData);
+    });
+    
+    // Generate table
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 56,
+      styles: { fontSize: 10 },
+      headStyles: { 
+        fillColor: [41, 128, 185], 
+        textColor: 255, 
+        fontStyle: 'bold' 
+      },
+      didDrawPage: function(data) {
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.text(
+          `Página ${data.pageNumber} de ${pageCount}`,
+          data.settings.margin.left,
+          doc.internal.pageSize.height - 10
+        );
+      }
+    });
+    
+    // Save the PDF
+    doc.save(`analisis_eventos_${selectedPeriod}_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   // Generate PDF for inventory report
   const generateInventoryPDF = () => {
     const doc = new jsPDF();
@@ -489,6 +588,17 @@ const Reports = () => {
           }}
         >
           Reporte de Mantenimiento
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'analysis' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveTab('analysis');
+            if (!eventAnalysisData) {
+              fetchEventAnalysis(selectedPeriod);
+            }
+          }}
+        >
+          Análisis de Eventos
         </button>
       </div>
 
@@ -796,6 +906,139 @@ const Reports = () => {
             </div>
           ) : (
             <div className="no-items">No se encontraron registros de mantenimiento.</div>
+          )}
+        </>
+      ) : activeTab === 'analysis' ? (
+        <>
+          <h2>Análisis de Eventos por Período</h2>
+          <p>Visualización de eventos agrupados por períodos de tiempo con porcentajes relativos.</p>
+          
+          <div className="report-controls" style={{ marginBottom: '20px' }}>
+            <label htmlFor="period-select" style={{ marginRight: '10px', fontWeight: 'bold' }}>Seleccionar período:</label>
+            <select 
+              id="period-select"
+              value={selectedPeriod} 
+              onChange={handlePeriodChange}
+              className="form-select"
+              style={{ width: '200px', padding: '8px' }}
+            >
+              <option value="monthly">Mensual</option>
+              <option value="quarterly">Trimestral</option>
+              <option value="yearly">Anual</option>
+            </select>
+          </div>
+          
+          {eventAnalysisData && (
+            <div className="report-actions" style={{ margin: '20px 0' }}>
+              <button 
+                onClick={generateEventAnalysisPDF} 
+                className="btn btn-export"
+                disabled={!eventAnalysisData || eventAnalysisData.periods.length === 0}
+              >
+                Exportar a PDF
+              </button>
+              <button 
+                onClick={() => generateExcel('analysis')} 
+                className="btn btn-export"
+                disabled={!eventAnalysisData || eventAnalysisData.periods.length === 0}
+              >
+                Exportar a Excel
+              </button>
+            </div>
+          )}
+          
+          {loading && activeTab === 'analysis' ? (
+            <div className="loading">Cargando análisis de eventos...</div>
+          ) : eventAnalysisData && eventAnalysisData.periods.length > 0 ? (
+            <div className="analysis-report">
+              <div className="analysis-summary" style={{ marginBottom: '30px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '5px' }}>
+                <h3>Resumen General</h3>
+                <p style={{ fontSize: '18px', fontWeight: 'bold' }}>Total de eventos: {eventAnalysisData.total_events}</p>
+                <p>Período con más eventos: <strong>{eventAnalysisData.periods.reduce((max, p) => p.count > max.count ? p : max, eventAnalysisData.periods[0]).period}</strong> ({eventAnalysisData.periods.reduce((max, p) => p.count > max.count ? p : max, eventAnalysisData.periods[0]).count} eventos)</p>
+              </div>
+              
+              {/* Bar Chart */}
+              <div style={{ marginBottom: '30px' }}>
+                <h3>Distribución de Eventos por Período</h3>
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart
+                    data={eventAnalysisData.periods}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="period" 
+                      angle={-45} 
+                      textAnchor="end" 
+                      height={100}
+                      interval={0}
+                    />
+                    <YAxis label={{ value: 'Cantidad de Eventos', angle: -90, position: 'insideLeft' }} />
+                    <Tooltip 
+                      formatter={(value, name) => {
+                        if (name === 'count') {
+                          const period = eventAnalysisData.periods.find(p => p.count === value);
+                          return [`${value} eventos (${period?.percentage || 0}%)`, 'Cantidad'];
+                        }
+                        return [value, name];
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="count" fill="#2980b9" name="Cantidad de Eventos">
+                      {eventAnalysisData.periods.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={`hsl(${210 + index * 25}, 70%, 50%)`} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              
+              {/* Periods Table */}
+              <div className="periods-table">
+                <h3>Desglose por Período</h3>
+                <table className="table" style={{ width: '100%' }}>
+                  <thead>
+                    <tr>
+                      <th>Período</th>
+                      <th>Cantidad de Eventos</th>
+                      <th>Porcentaje</th>
+                      <th>Visualización</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {eventAnalysisData.periods.map((period, index) => (
+                      <tr key={index}>
+                        <td><strong>{period.period}</strong></td>
+                        <td>{period.count}</td>
+                        <td>{period.percentage}%</td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <div style={{ 
+                              width: '200px', 
+                              height: '25px', 
+                              backgroundColor: '#e0e0e0', 
+                              borderRadius: '5px', 
+                              marginRight: '10px',
+                              overflow: 'hidden'
+                            }}>
+                              <div style={{ 
+                                width: `${period.percentage}%`, 
+                                height: '100%', 
+                                backgroundColor: '#2980b9',
+                                transition: 'width 0.3s ease'
+                              }}></div>
+                            </div>
+                            <span style={{ fontWeight: 'bold' }}>{period.percentage}%</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <div className="no-items">No se encontraron eventos para analizar.</div>
           )}
         </>
       ) : null}
