@@ -597,6 +597,106 @@ class MaintenanceReportView(APIView):
         return Response(maintenance_items)
 
 
+class EventAnalysisReportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """
+        Returns event analysis grouped by time periods (monthly, quarterly, yearly)
+        with count and percentage for each period.
+        """
+        period_type = request.query_params.get('period', 'monthly')  # monthly, quarterly, yearly
+        
+        # Get all events
+        eventos = Evento.objects.all().order_by('fecha_inicio')
+        
+        if not eventos.exists():
+            return Response({
+                'period_type': period_type,
+                'periods': [],
+                'total_events': 0
+            })
+        
+        # Group events by period
+        period_data = {}
+        total_events = eventos.count()
+        
+        for evento in eventos:
+            fecha = evento.fecha_inicio
+            
+            if period_type == 'monthly':
+                # Format: "Enero 2024", "Febrero 2024", etc.
+                period_key = fecha.strftime('%B %Y')
+                # Spanish month names
+                month_names = {
+                    'January': 'Enero', 'February': 'Febrero', 'March': 'Marzo',
+                    'April': 'Abril', 'May': 'Mayo', 'June': 'Junio',
+                    'July': 'Julio', 'August': 'Agosto', 'September': 'Septiembre',
+                    'October': 'Octubre', 'November': 'Noviembre', 'December': 'Diciembre'
+                }
+                for eng, esp in month_names.items():
+                    period_key = period_key.replace(eng, esp)
+                    
+            elif period_type == 'quarterly':
+                # Format: "Q1 2024", "Q2 2024", etc.
+                quarter = (fecha.month - 1) // 3 + 1
+                period_key = f"Q{quarter} {fecha.year}"
+                
+            else:  # yearly
+                # Format: "2024", "2025", etc.
+                period_key = str(fecha.year)
+            
+            if period_key not in period_data:
+                period_data[period_key] = {
+                    'period': period_key,
+                    'count': 0,
+                    'events': []
+                }
+            
+            period_data[period_key]['count'] += 1
+            period_data[period_key]['events'].append({
+                'id': evento.id,
+                'nombre': evento.nombre,
+                'fecha': evento.fecha_inicio.isoformat(),
+                'responsable': evento.responsable,
+                'cantidad_personas': evento.cantidad_personas
+            })
+        
+        # Calculate percentages and format response
+        periods = []
+        for period_key, data in period_data.items():
+            percentage = round((data['count'] / total_events) * 100, 1)
+            periods.append({
+                'period': data['period'],
+                'count': data['count'],
+                'percentage': percentage,
+                'events': data['events']
+            })
+        
+        # Sort periods chronologically
+        if period_type == 'yearly':
+            periods.sort(key=lambda x: x['period'])
+        elif period_type == 'quarterly':
+            periods.sort(key=lambda x: (x['period'].split()[1], x['period'].split()[0]))
+        else:  # monthly
+            # Sort by date parsing
+            month_order = {
+                'Enero': 1, 'Febrero': 2, 'Marzo': 3, 'Abril': 4,
+                'Mayo': 5, 'Junio': 6, 'Julio': 7, 'Agosto': 8,
+                'Septiembre': 9, 'Octubre': 10, 'Noviembre': 11, 'Diciembre': 12
+            }
+            periods.sort(key=lambda x: (
+                int(x['period'].split()[1]),  # year
+                month_order.get(x['period'].split()[0], 0)  # month
+            ))
+        
+        return Response({
+            'period_type': period_type,
+            'periods': periods,
+            'total_events': total_events
+        })
+
+
 class InventoryUsageReportView(APIView):
     permission_classes = [IsAuthenticated]
 
