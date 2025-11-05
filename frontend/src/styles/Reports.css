@@ -81,3 +81,27 @@
 .btn-download-excel {
     background-color: #5cb85c;
 }
+
+/* Maintenance report status badges */
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-in-maintenance {
+    background-color: #ffc107;
+    color: #856404;
+}
+
+.status-entered {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.status-exited {
+    background-color: #28a745;
+    color: #fff;
+}

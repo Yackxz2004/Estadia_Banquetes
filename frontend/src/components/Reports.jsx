@@ -33,8 +33,9 @@ const Reports = () => {
   const [events, setEvents] = useState([]);
   const [inventoryItems, setInventoryItems] = useState([]);
   const [warehouseData, setWarehouseData] = useState(null);
+  const [maintenanceItems, setMaintenanceItems] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('events'); // 'events', 'inventory', or 'warehouse'
+  const [activeTab, setActiveTab] = useState('events'); // 'events', 'inventory', 'warehouse', or 'maintenance'
 
   useEffect(() => {
     // Fetch event types
@@ -206,6 +207,20 @@ const Reports = () => {
     }
   };
 
+  // Fetch maintenance report data
+  const fetchMaintenanceReport = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/api/inventory/items/maintenance-report/');
+      setMaintenanceItems(response.data);
+    } catch (error) {
+      console.error('Error fetching maintenance report:', error);
+      alert('Error al cargar el reporte de mantenimiento. Por favor, intente de nuevo.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Generate PDF for warehouse report
   const generateWarehousePDF = () => {
     if (!warehouseData || warehouseData.warehouses.length === 0) return;
@@ -327,6 +342,60 @@ const Reports = () => {
     }
   };
 
+  // Generate PDF for maintenance report
+  const generateMaintenancePDF = () => {
+    const doc = new jsPDF();
+    
+    // Title
+    doc.setFontSize(18);
+    doc.text('Reporte de Mantenimiento - Mobiliario', 14, 22);
+    doc.setFontSize(12);
+    doc.setTextColor(100);
+    doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 14, 32);
+    doc.text('Últimos 30 días', 14, 40);
+    
+    // Table data
+    const tableColumn = ["Categoría", "Nombre", "Cantidad", "Estado", "Bodega"];
+    const tableRows = [];
+    
+    maintenanceItems.forEach(item => {
+      const itemData = [
+        item.categoria,
+        item.nombre,
+        item.cantidad_en_mantenimiento.toString(),
+        item.estado,
+        item.bodega_nombre || 'No especificada'
+      ];
+      tableRows.push(itemData);
+    });
+    
+    // Generate table
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 48,
+      styles: { fontSize: 10 },
+      headStyles: { 
+        fillColor: [41, 128, 185], 
+        textColor: 255, 
+        fontStyle: 'bold' 
+      },
+      didDrawPage: function(data) {
+        // Add footer
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.text(
+          `Página ${data.pageNumber} de ${pageCount}`,
+          data.settings.margin.left,
+          doc.internal.pageSize.height - 10
+        );
+      }
+    });
+    
+    // Save the PDF
+    doc.save(`reporte_mantenimiento_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   // Generate PDF for inventory report
   const generateInventoryPDF = () => {
     const doc = new jsPDF();
@@ -409,6 +478,17 @@ const Reports = () => {
           }}
         >
           Inventario por Bodega
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'maintenance' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveTab('maintenance');
+            if (maintenanceItems.length === 0) {
+              fetchMaintenanceReport();
+            }
+          }}
+        >
+          Reporte de Mantenimiento
         </button>
       </div>
 
@@ -657,6 +737,65 @@ const Reports = () => {
             </div>
           ) : (
             <div className="no-items">No se encontraron datos de inventario.</div>
+          )}
+        </>
+      ) : activeTab === 'maintenance' ? (
+        <>
+          <h2>Reporte de Mantenimiento - Mobiliario</h2>
+          <p>Mostrando mobiliario en mantenimiento o con actividad de mantenimiento en los últimos 30 días.</p>
+          
+          <div className="report-actions" style={{ margin: '20px 0' }}>
+            <button 
+              onClick={generateMaintenancePDF} 
+              className="btn btn-export"
+              disabled={maintenanceItems.length === 0}
+            >
+              Exportar a PDF
+            </button>
+            <button 
+              onClick={() => generateExcel('maintenance')} 
+              className="btn btn-export"
+              disabled={maintenanceItems.length === 0}
+            >
+              Exportar a Excel
+            </button>
+          </div>
+          
+          {loading && activeTab === 'maintenance' ? (
+            <div className="loading">Cargando reporte de mantenimiento...</div>
+          ) : maintenanceItems.length > 0 ? (
+            <div className="maintenance-table">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Categoría</th>
+                    <th>Nombre</th>
+                    <th>Cantidad</th>
+                    <th>Estado</th>
+                    <th>Bodega</th>
+                    <th>Fecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {maintenanceItems.map((item, index) => (
+                    <tr key={`${item.id}-${index}`}>
+                      <td>{item.categoria}</td>
+                      <td>{item.nombre}</td>
+                      <td>{item.cantidad_en_mantenimiento}</td>
+                      <td>
+                        <span className={`status-badge ${item.estado === 'En Mantenimiento' ? 'status-in-maintenance' : item.estado === 'Ingresó a Mantenimiento' ? 'status-entered' : 'status-exited'}`}>
+                          {item.estado}
+                        </span>
+                      </td>
+                      <td>{item.bodega_nombre || 'No especificada'}</td>
+                      <td>{item.fecha ? new Date(item.fecha).toLocaleDateString() : 'N/A'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="no-items">No se encontraron registros de mantenimiento.</div>
           )}
         </>
       ) : null}

@@ -5,7 +5,7 @@ from .views import (
     CristaleriaViewSet, SillaViewSet, MesaViewSet, SalaLoungeViewSet, PeriqueraViewSet, CarpaViewSet, 
     PistaTarimaViewSet, ExtraViewSet, EventoViewSet, ContentTypeViewSet, DegustacionViewSet, ProductViewSet, 
     CalendarDataAPIView, NotificationViewSet, InventoryUsageReportView, BackupCreateView, BackupRestoreView,
-    LowStockInventoryView, WarehouseInventoryReportView
+    LowStockInventoryView, WarehouseInventoryReportView, MaintenanceReportView
 )
 
 router = DefaultRouter()
@@ -40,6 +40,9 @@ urlpatterns = [
     
     # 3. Warehouse inventory report endpoint
     path('items/warehouse-report/', WarehouseInventoryReportView.as_view(), name='warehouse-inventory-report'),
+    
+    # 4. Maintenance report endpoint
+    path('items/maintenance-report/', MaintenanceReportView.as_view(), name='maintenance-report'),
     
     # 4. ROUTER (AL FINAL)
     path('', include(router.urls)), 
