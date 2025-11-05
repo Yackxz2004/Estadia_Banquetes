@@ -5,7 +5,7 @@ from .views import (
     CristaleriaViewSet, SillaViewSet, MesaViewSet, SalaLoungeViewSet, PeriqueraViewSet, CarpaViewSet, 
     PistaTarimaViewSet, ExtraViewSet, EventoViewSet, ContentTypeViewSet, DegustacionViewSet, ProductViewSet, 
     CalendarDataAPIView, NotificationViewSet, InventoryUsageReportView, BackupCreateView, BackupRestoreView,
-    LowStockInventoryView
+    LowStockInventoryView, WarehouseInventoryReportView
 )
 
 router = DefaultRouter()
@@ -29,12 +29,6 @@ router.register(r'content-types', ContentTypeViewSet, basename='content-type')
 router.register(r'products', ProductViewSet, basename='product')
 router.register(r'notifications', NotificationViewSet, basename='notification')
 
-
-
-# inventory/urls.py (CÓDIGO MODIFICADO)
-
-# ... (Definición del router permanece sin cambios) ...
-
 urlpatterns = [
     # 1. OTRAS RUTAS PERSONALIZADAS
     path('calendar/', CalendarDataAPIView.as_view(), name='calendar-data'),
@@ -44,6 +38,9 @@ urlpatterns = [
     # 2. Low stock inventory endpoint
     path('items/bajo-stock/', LowStockInventoryView.as_view(), name='low-stock-inventory'),
     
-    # 3. ROUTER (AL FINAL)
+    # 3. Warehouse inventory report endpoint
+    path('items/warehouse-report/', WarehouseInventoryReportView.as_view(), name='warehouse-inventory-report'),
+    
+    # 4. ROUTER (AL FINAL)
     path('', include(router.urls)), 
 ]

@@ -5,8 +5,19 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.conf import settings
 from django.http import FileResponse, Http404, HttpResponse # Combinamos HttpResponse aquí
-from django.db import connection
-from django.db import transaction
+from django.db import connection, transaction, models
+
+# Importaciones de Modelos y Serializadores (Se mantienen al final)
+from .models import (
+    TipoEvento, Bodega, Cliente, Manteleria, Cubierto, Loza, Cristaleria, Silla, Mesa, SalaLounge, 
+    Periquera, Carpa, PistaTarima, Extra, Evento, EventoMobiliario, Degustacion, DegustacionMobiliario, Product, Notification
+)
+from .serializers import (
+    TipoEventoSerializer, BodegaSerializer, ClienteSerializer, ManteleriaSerializer, CubiertoSerializer, 
+    LozaSerializer, CristaleriaSerializer, SillaSerializer, MesaSerializer, SalaLoungeSerializer, 
+    PeriqueraSerializer, CarpaSerializer, PistaTarimaSerializer, ExtraSerializer, EventoSerializer, DegustacionSerializer,
+    ProductSerializer, CalendarActivitySerializer, NotificationSerializer
+)
 
 # 💡 Importación ÚNICA Y CORRECTA de datetime
 from datetime import datetime, timedelta 
@@ -768,3 +779,84 @@ class BackupRestoreView(APIView):
             connection.ensure_connection()
             if os.path.exists(temp_file_path):
                 os.remove(temp_file_path)
+
+
+class WarehouseInventoryReportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """
+        Returns inventory data grouped by warehouse and category.
+        Shows percentage of inventory per warehouse and items by category.
+        """
+        # Define the inventory models to check
+        inventory_models = [
+            ('Manteleria', Manteleria),
+            ('Cubierto', Cubierto),
+            ('Loza', Loza),
+            ('Cristaleria', Cristaleria),
+            ('Sillas', Silla),
+            ('Mesas', Mesa),
+            ('Salas lounge', SalaLounge),
+            ('Periqueras', Periquera),
+            ('Carpas', Carpa),
+            ('Pistas y tarimas', PistaTarima),
+            ('Extras', Extra)
+        ]
+
+        # Get all warehouses
+        bodegas = Bodega.objects.all()
+        
+        # Structure to hold the report data
+        report_data = []
+        total_inventory = 0
+        
+        # Calculate total inventory across all warehouses
+        for category_name, model in inventory_models:
+            total_inventory += model.objects.aggregate(total=models.Sum('cantidad'))['total'] or 0
+        
+        # Process each warehouse
+        for bodega in bodegas:
+            bodega_data = {
+                'id': bodega.id,
+                'nombre': bodega.nombre,
+                'ubicacion': bodega.ubicacion,
+                'total_items': 0,
+                'percentage': 0,
+                'categories': []
+            }
+            
+            bodega_total = 0
+            category_details = []
+            
+            # Calculate inventory by category for this warehouse
+            for category_name, model in inventory_models:
+                category_total = model.objects.filter(bodega=bodega).aggregate(
+                    total=models.Sum('cantidad')
+                )['total'] or 0
+                
+                bodega_total += category_total
+                
+                category_details.append({
+                    'categoria': category_name,
+                    'cantidad': category_total,
+                    'percentage': 0  # Will calculate after we know bodega_total
+                })
+            
+            # Calculate percentages
+            bodega_data['total_items'] = bodega_total
+            if total_inventory > 0:
+                bodega_data['percentage'] = round((bodega_total / total_inventory) * 100, 2)
+            
+            # Calculate category percentages within this warehouse
+            for category in category_details:
+                if bodega_total > 0:
+                    category['percentage'] = round((category['cantidad'] / bodega_total) * 100, 2)
+            
+            bodega_data['categories'] = category_details
+            report_data.append(bodega_data)
+        
+        return Response({
+            'total_inventory': total_inventory,
+            'warehouses': report_data
+        })
