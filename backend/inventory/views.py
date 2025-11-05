@@ -489,7 +489,113 @@ class LowStockInventoryView(APIView):
 
         return Response(low_stock_items)
 
+
+class MaintenanceReportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """
+        Returns a list of all furniture items currently in maintenance or that 
+        were in maintenance activity (entry/exit) in the last 30 days.
+        """
+        # Define the inventory models to check (furniture/mobiliary items)
+        inventory_models = [
+            Manteleria, Cubierto, Loza, Cristaleria, Silla,
+            Mesa, SalaLounge, Periquera, Carpa, PistaTarima, Extra
+        ]
+
+        maintenance_items = []
         
+        # Get date range for the last 30 days
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=30)
+
+        # 1. Get items currently in maintenance
+        for model in inventory_models:
+            items = model.objects.filter(cantidad_en_mantenimiento__gt=0).select_related('bodega')
+            
+            for item in items:
+                maintenance_items.append({
+                    'id': item.id,
+                    'categoria': model._meta.verbose_name_plural.title(),
+                    'nombre': item.producto,
+                    'descripcion': item.descripcion,
+                    'cantidad_en_mantenimiento': item.cantidad_en_mantenimiento,
+                    'cantidad_disponible': item.cantidad,
+                    'bodega_id': item.bodega.id if item.bodega else None,
+                    'bodega_nombre': item.bodega.nombre if item.bodega else 'No especificada',
+                    'estado': 'En Mantenimiento',
+                    'fecha': item.updated_at.isoformat() if item.updated_at else None,
+                    'tipo': model.__name__.lower()
+                })
+
+        # 2. Get maintenance activity from notifications in the last 30 days
+        maintenance_notifications = Notification.objects.filter(
+            created_at__gte=start_date,
+            created_at__lte=end_date
+        ).filter(
+            models.Q(message__icontains='ingresado al mantenimiento') | 
+            models.Q(message__icontains='salido del mantenimiento')
+        ).order_by('-created_at')
+
+        # Parse notifications to extract maintenance history
+        for notification in maintenance_notifications:
+            message = notification.message
+            
+            # Determine if it's entry or exit from maintenance
+            if 'ingresado al mantenimiento' in message.lower():
+                estado = 'Ingresó a Mantenimiento'
+            elif 'salido del mantenimiento' in message.lower():
+                estado = 'Salió de Mantenimiento'
+            else:
+                continue
+            
+            # Try to extract quantity and product name from message
+            # Message format: "Han ingresado/salido del mantenimiento {cantidad} {producto}."
+            import re
+            match = re.search(r'(\d+)\s+(.+?)\.$', message)
+            if match:
+                cantidad = int(match.group(1))
+                producto = match.group(2).strip()
+                
+                # Find the model that matches this product
+                found_item = None
+                for model in inventory_models:
+                    try:
+                        item = model.objects.filter(producto=producto).first()
+                        if item:
+                            found_item = {
+                                'id': f"notif_{notification.id}",
+                                'categoria': model._meta.verbose_name_plural.title(),
+                                'nombre': producto,
+                                'descripcion': '',
+                                'cantidad_en_mantenimiento': cantidad,
+                                'cantidad_disponible': item.cantidad if item else 0,
+                                'bodega_id': item.bodega.id if item and item.bodega else None,
+                                'bodega_nombre': item.bodega.nombre if item and item.bodega else 'No especificada',
+                                'estado': estado,
+                                'fecha': notification.created_at.isoformat(),
+                                'tipo': model.__name__.lower()
+                            }
+                            break
+                    except Exception as e:
+                        continue
+                
+                if found_item:
+                    # Check if this item is not already in the list (avoid duplicates with current maintenance)
+                    is_duplicate = any(
+                        existing['nombre'] == found_item['nombre'] and 
+                        existing['estado'] == 'En Mantenimiento'
+                        for existing in maintenance_items
+                    )
+                    if not is_duplicate:
+                        maintenance_items.append(found_item)
+
+        # Sort by date (most recent first) and then by category
+        maintenance_items.sort(key=lambda x: (x.get('fecha', ''), x['categoria']), reverse=True)
+
+        return Response(maintenance_items)
+
 
 class InventoryUsageReportView(APIView):
     permission_classes = [IsAuthenticated]
