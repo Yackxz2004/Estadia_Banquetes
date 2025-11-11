@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from posts.views import CreateUserView, MyTokenObtainPairView, UserListView, UserCreateView, UserUpdateView, UserDeleteView
+from posts.views import CreateUserView, MyTokenObtainPairView, UserListView, UserCreateView, UserUpdateView, UserDeleteView, PasswordResetRequestView, PasswordResetConfirmView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
@@ -33,6 +33,9 @@ urlpatterns = [
     path('api/users/create/', UserCreateView.as_view(), name='user-create'),
     path('api/users/update/<int:pk>/', UserUpdateView.as_view(), name='user-update'),
     path('api/users/delete/<int:pk>/', UserDeleteView.as_view(), name='user-delete'),
+    # Password Reset
+    path('api/password-reset/', PasswordResetRequestView.as_view(), name='password-reset-request'),
+    path('api/password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
 ]
 
 if settings.DEBUG:
