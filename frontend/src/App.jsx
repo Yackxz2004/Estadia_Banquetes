@@ -31,6 +31,8 @@ import Calendario from "./pages/Calendario";
 import Reports from "./components/Reports";
 import Notifications from "./pages/Notifications";
 import BackupPage from "./pages/BackupPage";
+import Invitaciones from "./pages/Invitaciones";
+import InvitacionBoda from "./pages/InvitacionBoda";
 
 function Logout() {
   localStorage.clear();
@@ -296,6 +298,22 @@ function App() {
           element={
             <ProtectedRoute>
               <BackupPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory/invitaciones"
+          element={
+            <ProtectedRoute>
+              <Invitaciones />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory/invitaciones/:id"
+          element={
+            <ProtectedRoute>
+              <InvitacionBoda />
             </ProtectedRoute>
           }
         />

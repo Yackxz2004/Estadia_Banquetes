@@ -33,6 +33,7 @@ const NavbarInventory = () => {
                         {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
                     </Link>
                 </li>
+                <li><Link to="/inventory/invitaciones">Invitaciones</Link></li>
                 <li><Link to="/inventory/calendar">Calendario</Link></li>
                 <li><Link to="/inventory/reports">Reportes</Link></li>
                 <li><Link to="/inventory/backup">Respaldo</Link></li>
