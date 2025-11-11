@@ -1,6 +1,72 @@
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib.auth.models import User
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def send_notification_email(message):
+    """
+    Envía un correo electrónico a todos los usuarios con rol 'admin' o 'Encargado'
+    
+    Args:
+        message (str): El mensaje de la notificación a enviar
+    
+    Returns:
+        int: Número de correos enviados exitosamente
+    """
+    try:
+        from posts.models import Profile
+        
+        # Obtener usuarios con rol 'admin' o 'Encargado' que tengan email
+        admin_profiles = Profile.objects.filter(rol__in=['admin', 'Encargado'])
+        admin_users = User.objects.filter(
+            profile__in=admin_profiles,
+            email__isnull=False
+        ).exclude(email='')
+        
+        if not admin_users.exists():
+            logger.warning("No se encontraron usuarios con rol admin o Encargado con correo electrónico")
+            return 0
+        
+        # Obtener lista de correos
+        recipient_list = [user.email for user in admin_users]
+        
+        # Configurar el asunto y cuerpo del correo
+        subject = '⚠️ Notificación de Inventario - Sistema de Banquetes'
+        email_message = f"""
+Estimado(a) usuario(a),
+
+Se ha generado una nueva notificación en el sistema de inventario:
+
+{message}
+
+Por favor, revise el sistema para tomar las acciones necesarias.
+
+Atentamente,
+Sistema de Gestión de Banquetes
+        """
+        
+        # Enviar el correo
+        sent_count = send_mail(
+            subject=subject,
+            message=email_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=recipient_list,
+            fail_silently=False,
+        )
+        
+        logger.info(f"Correos de notificación enviados exitosamente a {len(recipient_list)} usuarios")
+        return sent_count
+        
+    except Exception as e:
+        logger.error(f"Error al enviar correos de notificación: {str(e)}")
+        # No lanzar la excepción para no interrumpir el flujo del guardado
+        return 0
 
 class TipoEvento(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
@@ -39,6 +105,9 @@ class InventarioItem(models.Model):
                 if old_item.cantidad >= 10 and self.cantidad < 10:
                     message = f"¡Alerta de bajo stock! El artículo '{self.producto}' tiene actualmente {self.cantidad} unidades. ¡Requiere reabastecimiento urgente!"
                     Notification.objects.create(message=message)
+                    # Enviar correo a usuarios admin y Encargado
+                    send_notification_email(message)
+                    logger.info(f"Notificación creada y correo enviado para {self.producto}")
             except self.__class__.DoesNotExist:
                 pass  # El objeto es nuevo, no hay nada que comparar
 
