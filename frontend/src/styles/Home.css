@@ -1,139 +1,751 @@
-/* Container for the whole page */
-div {
-  font-family: Arial, sans-serif;
-}
+/* Importación de fuentes */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Playfair+Display:ital@1&display=swap');
 
-/* Styles for the posts section */
-.posts-section {
-  margin-bottom: 2rem;
-}
-
-.posts-section h2 {
-  color: #333;
-  font-size: 24px;
-}
-
-/* Styles for individual posts - assuming your posts component has some container element */
-.post {
-  background-color: #f9f9f9;
-  border-left: 5px solid #007bff;
-  margin: 10px 0;
-  padding: 10px 15px;
-  border-radius: 5px;
-}
-
-/* Styles for the form section */
-form {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  max-width: 500px;
-  margin: auto;
-}
-
-form h2 {
-  color: #333;
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-form label {
-  font-weight: bold;
-  margin-top: 10px;
-}
-
-form input,
-form textarea {
-  width: 100%;
-  padding: 8px;
-  margin: 8px 0 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-form input[type="submit"] {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-form input[type="submit"]:hover {
-  background-color: #0056b3;
-}
-
-:root {
-  --primary-color: #ffffff;
-  --secondary-color: #f0f0f0;
-  --text-color: #333;
-  --font-family: 'Serif', 'Times New Roman', Times, serif;
-}
-
+/* Estilos generales */
 body {
   margin: 0;
-  font-family: var(--font-family);
-  background-color: var(--secondary-color);
-  color: var(--text-color);
+  padding: 0;
+  font-family: 'Montserrat', sans-serif;
+  color: #FFFFFF;
+  background-color: #000000;
 }
 
 .home-container {
-  text-align: center;
+  min-height: 100vh;
 }
 
+/* Estilos para la sección Hero */
 .hero-section {
-  height: 100vh;
-  background: url('https://images.unsplash.com/photo-1551632436-cbf8935414d5?q=80&w=2071&auto=format&fit=crop') no-repeat center center/cover; /* Reemplazar con la imagen real */
+  background-color: #000000;
+  min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  color: var(--primary-color);
+  justify-content: center;
+  position: relative;
+  padding-top: 80px; /* Para compensar la Navbar fija */
+}
+
+/* Número de referencia "01" */
+.reference-number {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: #FFFFFF;
+}
+
+/* Contenido del Hero */
+.hero-content {
+  text-align: center;
+  z-index: 1;
+  padding: 20px;
   position: relative;
 }
 
-.hero-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+/* Estilos para la sección Sobre Nosotros */
+.about-section {
+  padding: 80px 0;
+  background-color: #000000;
+  color: #FFFFFF;
 }
 
-.hero-content {
-    position: relative;
-    z-index: 1;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
-.hero-content h1 {
-  font-size: 2rem;
-  font-weight: normal;
-  letter-spacing: 0.2em;
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 50px;
+  color: #FFFFFF; /* Cambiado a blanco */
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.about-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: flex-start; /* Alineación al inicio */
+}
+
+.about-text {
+  flex: 1;
+  min-width: 300px;
+}
+
+.about-description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 20px;
+  color: #E0E0E0;
+}
+
+.highlight {
+  color: #B8860B;
+  font-weight: 600;
+}
+
+.about-features {
+  margin: 30px 0;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  color: #E0E0E0;
+}
+
+.feature-icon {
+  color: #B8860B;
+  font-weight: bold;
+  margin-right: 15px;
+  font-size: 1.2rem;
+}
+
+.cta-button {
+  background-color: #B8860B;
+  color: #000000;
+  border: none;
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+}
+
+.cta-button:hover {
+  background-color: #D4A017;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(184, 134, 11, 0.3);
+}
+
+.about-image {
+  flex: 1;
+  min-width: 300px;
+  order: 1; /* Mover la imagen a la izquierda */
+}
+
+.about-text {
+  flex: 1;
+  min-width: 300px;
+  order: 2; /* Mover el texto a la derecha */
+}
+
+.image-placeholder {
+  background-color: #1A1A1A;
+  border: 2px dashed #333333;
+  border-radius: 8px;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666666;
+  font-size: 1.1rem;
+}
+
+/* Estilos para la sección Sociales */
+.social-section {
+  padding: 80px 0;
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.social-grid {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 40px 0;
+}
+
+.social-item {
+  flex: 1;
+  min-width: 250px;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.social-image-placeholder {
+  height: 300px;
+  background-color: #2A2A2A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666666;
+  font-size: 1.2rem;
+  border: 1px solid #333333;
+  border-radius: 4px;
+  transition: transform 0.3s ease;
+  margin-bottom: 15px;
+  cursor: pointer;
+}
+
+.social-image-placeholder:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.social-item-title {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #FFFFFF;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.social-events {
+  text-align: center;
+  margin-top: 50px;
+  padding-top: 30px;
+  border-top: 1px solid #333333;
+}
+
+.social-events p {
+  color: #FFFFFF;
+  font-size: 1.3rem;
+  font-weight: 300;
+  letter-spacing: 1px;
   margin: 0;
   text-transform: uppercase;
 }
 
-.hero-content .brand-name {
-  font-size: 8rem;
-  font-family: 'Great Vibes', cursive; /* Se necesita una fuente caligráfica, esto es un ejemplo */
-  margin: -20px 0 0 0;
+.social-events p::before,
+.social-events p::after {
+  content: "•";
+  color: #B8860B;
+  margin: 0 10px;
+  font-size: 1.5rem;
+  vertical-align: middle;
+  line-height: 1;
 }
 
-.content-section {
-  padding: 100px 20px;
-  min-height: 400px;
+.social-events p::before {
+  display: none;
 }
 
-.content-section:nth-child(odd) {
-  background-color: var(--primary-color);
+.social-events p::after {
+  display: inline;
 }
 
-.content-section h2 {
-  font-size: 2.5rem;
+/* Ajustes responsivos */
+@media (max-width: 1200px) {
+  .social-item {
+    min-width: calc(33.333% - 20px);
+  }
+}
+
+@media (max-width: 992px) {
+  .social-item {
+    min-width: calc(50% - 20px);
+  }
+  
+  .social-text-block p {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .social-item {
+    min-width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .social-text-block {
+    margin-top: 30px;
+  }
+  
+  .social-text-block p {
+    font-size: 1rem;
+  }
+  
+  .social-text-block p::before,
+  .social-text-block p::after {
+    margin: 0 5px;
+    font-size: 1.2rem;
+  }
+}
+
+/* Ajustes responsivos */
+@media (max-width: 1200px) {
+  .social-item {
+    min-width: calc(33.333% - 20px);
+  }
+}
+
+@media (max-width: 992px) {
+  .social-item {
+    min-width: calc(50% - 20px);
+  }
+}
+
+@media (max-width: 768px) {
+  .social-item {
+    min-width: 100%;
+  }
+  
+  .social-list {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .social-list h3 {
+    margin: 5px 0;
+    padding-left: 25px;
+  }
+}
+
+/* Estilos para la sección Corporativos */
+.corporate-section {
+  padding: 80px 0;
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.corporate-grid {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 40px 0;
+}
+
+.corporate-image-placeholder {
+  width: 100%;
+  height: 300px;
+  background-color: #2A2A2A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666666;
+  font-size: 1.2rem;
+  border: 1px solid #333333;
+  border-radius: 4px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 15px;
+  cursor: pointer;
+}
+
+.corporate-image-placeholder:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.corporate-item {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   margin-bottom: 20px;
+}
+
+.corporate-item-title {
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: #FFFFFF;
+  margin: 15px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.corporate-events {
+  text-align: center;
+  margin-top: 50px;
+  padding-top: 30px;
+  border-top: 1px solid #333333;
+}
+
+.corporate-events p {
+  color: #FFFFFF;
+  font-size: 1.3rem;
+  font-weight: 300;
+  letter-spacing: 1px;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.corporate-events p::before,
+.corporate-events p::after {
+  content: "•";
+  color: #B8860B;
+  margin: 0 10px;
+  font-size: 1.5rem;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.corporate-events p::before {
+  display: none;
+}
+
+.corporate-events p::after {
+  display: inline;
+}
+
+/* Estilos para la sección Gubernamentales */
+.government-section {
+  padding: 80px 0;
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.government-grid {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 40px 0;
+}
+
+.government-item {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.government-item-title {
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: #FFFFFF;
+  margin: 25px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.government-image-placeholder {
+  width: 100%;
+  height: 300px;
+  background-color: #2A2A2A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666666;
+  font-size: 1.2rem;
+  border: 1px solid #333333;
+  border-radius: 4px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.government-image-placeholder:hover,
+.dressing-room-image-placeholder:hover,
+.additional-image-placeholder:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos para la sección Camerinos */
+.dressing-room-section {
+  padding: 80px 0;
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.dressing-room-grid {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 40px 0;
+}
+
+.dressing-room-item {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  justify-content: center;
+}
+
+.dressing-room-image-placeholder {
+  width: 100%;
+  height: 300px;
+  background-color: #2A2A2A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666666;
+  font-size: 1.2rem;
+  border: 1px solid #333333;
+  border-radius: 4px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.dressing-room-title {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.dressing-room-title h3 {
+  color: #FFFFFF;
+  font-size: 1.5rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+  padding: 20px 0;
+  border-top: 1px solid #333333;
+}
+
+.dressing-room-artists {
+  text-align: center;
+  margin-top: 30px;
+  color: #FFFFFF;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 20px;
+}
+
+.dressing-room-artists p {
+  margin: 0;
+  color: #CCCCCC;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+.dressing-room-artists p::before {
+  content: "•";
+  color: #B8860B;
+  font-size: 1.5em;
+  margin: 0 8px;
+  position: relative;
+  top: 2px;
+}
+
+.dressing-room-artists p::after {
+  content: "•";
+  color: #B8860B;
+  font-size: 1.5em;
+  margin: 0 8px;
+  position: relative;
+  top: 2px;
+}
+
+.dressing-room-artists p::before {
+  margin-right: 10px;
+}
+
+.dressing-room-artists p::after {
+  margin-left: 10px;
+}
+
+/* Estilos para la sección Adicionales */
+.additional-section {
+  padding: 80px 0;
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.additional-grid {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 40px 0;
+}
+
+.additional-item {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  justify-content: center;
+}
+
+.additional-image-placeholder {
+  width: 100%;
+  height: 300px;
+  background-color: #2A2A2A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666666;
+  font-size: 1.2rem;
+  border: 1px solid #333333;
+  border-radius: 4px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.additional-services {
+  text-align: center;
+  margin-top: 40px;
+  padding: 30px 20px;
+  background-color: #000000;
+  border-radius: 4px;
+}
+
+.additional-services p {
+  color: #CCCCCC;
+  font-size: 1.1rem;
+  line-height: 2;
+  margin: 0;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+.additional-services p::before {
+  content: "•";
+  color: #B8860B;
+  font-size: 1.5em;
+  margin: 0 8px;
+  position: relative;
+  top: 2px;
+}
+
+.additional-services p::after {
+  content: "•";
+  color: #B8860B;
+  font-size: 1.5em;
+  margin: 0 8px;
+  position: relative;
+  top: 2px;
+}
+
+.additional-services p::before {
+  margin-right: 10px;
+}
+
+.additional-services p::after {
+  margin-left: 10px;
+}
+
+/* Ajustes responsivos para la sección Gubernamentales */
+@media (max-width: 992px) {
+  .government-item {
+    min-width: calc(50% - 20px);
+  }
+  
+  .government-item:last-child,
+  .dressing-room-item:last-child,
+  .additional-item:last-child {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .government-item,
+  .dressing-room-item,
+  .additional-item {
+    min-width: 100%;
+  }
+}
+
+.corporate-image-placeholder {
+  width: 100%;
+  height: 300px;
+  background-color: #2A2A2A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666666;
+  font-size: 1.2rem;
+  border: 1px solid #333333;
+  border-radius: 4px;
+}
+
+/* Ajustes responsivos para la sección Corporativos */
+@media (max-width: 992px) {
+  .corporate-item {
+    min-width: calc(50% - 20px);
+  }
+  
+  .corporate-item:last-child {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .corporate-item {
+    min-width: 100%;
+  }
+  
+  .social-list h3:first-child {
+    padding-left: 0;
+  }
+}
+
+
+/* Estilo para el título secundario "BANQUETES" */
+.hero-content h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  margin: 0 0 20px 0;
+  color: #FFFFFF;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilo para el título principal "Boyás" */
+.hero-content .brand-name {
+  font-family: 'Great Vibes', cursive;
+  font-size: 120px;
+  font-weight: 400;
+  margin: 0;
+  line-height: 1;
+  color: #FFFFFF;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 1024px) {
+  .hero-content h1 {
+    font-size: 16px;
+    letter-spacing: 6px;
+  }
+  
+  .hero-content .brand-name {
+    font-size: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-content h1 {
+    font-size: 14px;
+    letter-spacing: 4px;
+  }
+  
+  .hero-content .brand-name {
+    font-size: 80px;
+  }
+  
+  .reference-number {
+    right: 20px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content h1 {
+    font-size: 12px;
+    letter-spacing: 3px;
+  }
+  
+  .hero-content .brand-name {
+    font-size: 60px;
+  }
 }

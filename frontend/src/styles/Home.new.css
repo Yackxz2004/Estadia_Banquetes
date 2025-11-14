@@ -1,0 +1,71 @@
+/* Estilos generales */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat', sans-serif;
+  color: #FFFFFF;
+}
+
+/* Estilos para la sección Hero */
+.hero-section {
+  background-color: #000000;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding-top: 80px; /* Para compensar la Navbar fija */
+}
+
+/* Número de referencia "01" */
+.reference-number {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: #FFFFFF;
+}
+
+/* Contenido del Hero */
+.hero-content {
+  text-align: center;
+  z-index: 1;
+}
+
+/* Estilo para el título secundario "BANQUETES" */
+.hero-content h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  margin: 0 0 20px 0;
+  color: #FFFFFF;
+}
+
+/* Estilo para el título principal "Boyás" */
+.hero-content .brand-name {
+  font-family: 'Great Vibes', cursive;
+  font-size: 120px;
+  font-weight: 400;
+  margin: 0;
+  line-height: 1;
+  color: #FFFFFF;
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+  .hero-content h1 {
+    font-size: 14px;
+    letter-spacing: 4px;
+  }
+  
+  .hero-content .brand-name {
+    font-size: 80px;
+  }
+}
+
+/* Importación de fuentes */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Great+Vibes&display=swap');

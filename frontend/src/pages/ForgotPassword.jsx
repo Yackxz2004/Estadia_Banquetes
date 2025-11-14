@@ -13,9 +13,15 @@ function ForgotPassword() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
         setMessage('');
         setError('');
+
+        if (!username) {
+            setError('El nombre de usuario es requerido.');
+            return;
+        }
+
+        setLoading(true);
 
         try {
             const res = await api.post('/api/password-reset/', { username });
@@ -35,62 +41,45 @@ function ForgotPassword() {
     };
 
     return (
-        <div className="form-container">
-            <h1>Restablecer Contraseña</h1>
-            <p style={{ textAlign: 'center', marginBottom: '20px', color: '#666' }}>
-                Ingresa tu nombre de usuario y te enviaremos un correo con instrucciones
-            </p>
-            
-            <form onSubmit={handleSubmit}>
-                <input
-                    className="form-input"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Nombre de usuario"
-                    required
-                />
+        <div className="form-page-wrapper">
+            <form onSubmit={handleSubmit} className="form-container">
+                <div className="form-header">
+                    <h1>Restablecer</h1>
+                    <p>
+                        Ingresa tu usuario y te enviaremos un correo con instrucciones.
+                    </p>
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="username">Nombre de usuario</label>
+                    <input
+                        id="username"
+                        className={`form-input ${error ? 'error' : ''}`}
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Ingresa tu nombre de usuario"
+                    />
+                    {error && <span className="error-text">{error}</span>}
+                </div>
                 
                 {loading && <LoadingIndicator />}
                 
-                {message && (
-                    <div style={{ 
-                        padding: '10px', 
-                        margin: '10px 0', 
-                        backgroundColor: '#d4edda', 
-                        color: '#155724',
-                        borderRadius: '5px',
-                        border: '1px solid #c3e6cb'
-                    }}>
-                        {message}
-                    </div>
-                )}
-                
-                {error && (
-                    <div style={{ 
-                        padding: '10px', 
-                        margin: '10px 0', 
-                        backgroundColor: '#f8d7da', 
-                        color: '#721c24',
-                        borderRadius: '5px',
-                        border: '1px solid #f5c6cb'
-                    }}>
-                        {error}
-                    </div>
-                )}
+                {message && <div className="success-message">{message}</div>}
                 
                 <button className="form-button" type="submit" disabled={loading}>
-                    Enviar Correo
+                    {loading ? 'Enviando...' : 'Enviar Correo'}
                 </button>
                 
-                <button 
-                    type="button"
-                    className="form-button" 
-                    style={{ marginTop: '10px', backgroundColor: '#6c757d' }}
-                    onClick={() => navigate('/login')}
-                >
-                    Volver al Login
-                </button>
+                <div className="form-footer">
+                    <button 
+                        type="button"
+                        className="btn-cancel"
+                        onClick={() => navigate('/login')}
+                    >
+                        Volver al Login
+                    </button>
+                </div>
             </form>
         </div>
     );

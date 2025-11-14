@@ -1,36 +1,128 @@
-.inventory-page-container {
-  display: flex;
-  flex-direction: column;
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@300;400;600&display=swap');
+
+:root {
+  --bg-dark: #121212;
+  --card-bg: #1E1E1E;
+  --border-color: #3A3A3A;
+  --text-primary: #FFFFFF;
+  --text-secondary: #B0B0B0;
+  --accent-color: #B8860B;
+  --card-hover-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.inventory-page {
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
   min-height: 100vh;
 }
 
-.inventory-content {
-  padding: 2rem;
+.inventory-main-content {
+  padding: 2rem 4rem;
+}
+
+/* Encabezado */
+.inventory-header {
   text-align: center;
-  flex-grow: 1;
+  margin-bottom: 3rem;
 }
 
-.inventory-actions {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 2rem;
-  flex-wrap: wrap;
+.inventory-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
 }
 
-.action-button {
-  display: inline-block;
-  padding: 1rem 2rem;
-  background-color: #007bff;
-  color: white;
-  text-decoration: none;
-  border-radius: 5px;
+.inventory-header p {
+  font-family: 'Montserrat', sans-serif;
   font-size: 1.1rem;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  color: var(--text-secondary);
+  font-weight: 300;
 }
 
-.action-button:hover {
-  background-color: #0056b3;
+/* Cuadrícula de acciones */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Tarjeta de acción */
+.action-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--card-hover-shadow);
+  border-color: var(--accent-color);
+}
+
+/* Efecto de brillo en el hover */
+.action-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.action-card:hover::before {
+  left: 100%;
+}
+
+/* Ícono de la tarjeta */
+.action-card-icon {
+  margin-bottom: 1rem;
+  color: var(--accent-color);
+}
+
+/* Etiqueta de la tarjeta */
+.action-card-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+  .inventory-main-content {
+    padding: 2rem;
+  }
+
+  .actions-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+
+  .inventory-header h1 {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .actions-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .action-card {
+    padding: 1.5rem;
+  }
 }

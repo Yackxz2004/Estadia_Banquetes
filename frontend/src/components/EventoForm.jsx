@@ -2,36 +2,116 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createEvento, updateEvento, getEventos, getTiposEvento, getAllMobiliario, getContentTypes } from '../api/inventory';
 import { toast } from 'react-hot-toast';
+import '../styles/EventoForm.css';
 
 // Componente para la selección de mobiliario
 const MobiliarioSelector = ({ allMobiliario, onAdd }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedItem, setSelectedItem] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [error, setError] = useState('');
 
-  // Use categoryName for display
+  // Obtener categorías únicas
   const categories = [...new Set(allMobiliario.map(m => m.categoryName))];
-  // Filter items based on the selected categoryName
+  // Filtrar ítems según la categoría seleccionada
   const itemsInCategory = allMobiliario.filter(m => m.categoryName === selectedCategory);
 
   const handleAdd = () => {
+    setError('');
+    
+    if (!selectedCategory) {
+      setError('Por favor selecciona una categoría');
+      return;
+    }
+    
+    if (!selectedItem) {
+      setError('Por favor selecciona un producto');
+      return;
+    }
+    
     const itemToAdd = itemsInCategory.find(m => m.id === parseInt(selectedItem));
-    if (!itemToAdd || !quantity) return;
+    if (!itemToAdd) return;
+    
+    if (quantity < 1) {
+      setError('La cantidad debe ser al menos 1');
+      return;
+    }
+    
+    if (quantity > itemToAdd.cantidad) {
+      setError(`Cantidad no disponible. Máximo: ${itemToAdd.cantidad}`);
+      return;
+    }
+    
     onAdd(itemToAdd, quantity);
+    // Resetear el formulario después de agregar
+    setSelectedItem('');
+    setQuantity(1);
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end p-4 border rounded mb-4">
-      <select onChange={(e) => setSelectedCategory(e.target.value)} value={selectedCategory} className="p-2 border rounded">
-        <option value="">Selecciona Categoría</option>
-        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-      </select>
-      <select onChange={(e) => setSelectedItem(e.target.value)} value={selectedItem} className="p-2 border rounded" disabled={!selectedCategory}>
-        <option value="">Selecciona Producto</option>
-        {itemsInCategory.map(it => <option key={it.id} value={it.id}>{it.producto} (Disp: {it.cantidad})</option>)}
-      </select>
-      <input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} min="1" className="p-2 border rounded" />
-      <button type="button" onClick={handleAdd} className="bg-blue-500 text-white p-2 rounded">Añadir</button>
+    <div className="mobiliario-selector-form">
+      <div className="form-group">
+        <label htmlFor="categoria">Categoría</label>
+        <select 
+          id="categoria"
+          onChange={(e) => {
+            setSelectedCategory(e.target.value);
+            setSelectedItem('');
+          }} 
+          value={selectedCategory} 
+          className="form-control form-control-select"
+        >
+          <option value="">Selecciona una categoría</option>
+          {categories.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+      </div>
+      
+      <div className="form-group">
+        <label htmlFor="producto">Producto</label>
+        <select 
+          id="producto"
+          onChange={(e) => setSelectedItem(e.target.value)} 
+          value={selectedItem} 
+          className="form-control form-control-select" 
+          disabled={!selectedCategory}
+        >
+          <option value="">Selecciona un producto</option>
+          {itemsInCategory.map(it => (
+            <option key={it.id} value={it.id}>
+              {it.producto} (Disponible: {it.cantidad})
+            </option>
+          ))}
+        </select>
+      </div>
+      
+      <div className="form-group">
+        <label htmlFor="cantidad">Cantidad</label>
+        <input 
+          type="number" 
+          id="cantidad"
+          value={quantity} 
+          onChange={(e) => setQuantity(parseInt(e.target.value) || '')} 
+          min="1" 
+          className="form-control" 
+          placeholder="Cantidad"
+        />
+      </div>
+      
+      <div className="form-group">
+        <label>&nbsp;</label>
+        <button 
+          type="button" 
+          onClick={handleAdd} 
+          className="btn btn-add"
+          disabled={!selectedCategory || !selectedItem || !quantity}
+        >
+          Añadir a la lista
+        </button>
+      </div>
+      
+      {error && <div className="error-message">{error}</div>}
     </div>
   );
 };
@@ -149,50 +229,183 @@ function EventoForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="container mx-auto p-4 bg-white shadow-md rounded-lg">
-      <h1 className="text-3xl font-bold mb-6 text-gray-700">{id ? 'Editar' : 'Crear'} Evento</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <input name="nombre" value={evento.nombre} onChange={handleChange} placeholder="Nombre del Evento" className="p-2 border rounded" required />
-        <select name="tipo_evento" value={evento.tipo_evento} onChange={handleChange} className="p-2 border rounded" required>
-          <option value="">Selecciona Tipo de Evento</option>
-          {tiposEvento.map(tipo => <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>)}
-        </select>
-        <input type="number" name="cantidad_personas" value={evento.cantidad_personas} onChange={handleChange} placeholder="Cantidad de Personas" className="p-2 border rounded" required />
-        <input name="responsable" value={evento.responsable} onChange={handleChange} placeholder="Responsable" className="p-2 border rounded" required />
-        <input name="lugar" value={evento.lugar} onChange={handleChange} placeholder="Lugar del Evento" className="p-2 border rounded" required />
-        <select name="estado" value={evento.estado} onChange={handleChange} className="p-2 border rounded">
-          <option value="Por iniciar">Por iniciar</option>
-          <option value="En proceso">En proceso</option>
-          <option value="Finalizado">Finalizado</option>
-          <option value="Cancelado">Cancelado</option>
-        </select>
-        <input type="date" name="fecha_inicio" value={evento.fecha_inicio} onChange={handleChange} className="p-2 border rounded" required />
-        <input type="time" name="hora_inicio" value={evento.hora_inicio} onChange={handleChange} className="p-2 border rounded" required />
-      </div>
-      
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4 text-gray-700">Añadir Mobiliario</h2>
-        <MobiliarioSelector allMobiliario={allMobiliario} onAdd={handleAddMobiliario} />
-      </div>
+    <div className="evento-form-container">
+      <form onSubmit={handleSubmit} className="evento-form">
+        <h1>{id ? 'Editar' : 'Crear Nuevo'} Evento</h1>
+        
+        <div className="form-section">
+          <h2>Información del Evento</h2>
+          <div className="form-grid">
+            <div className="form-group">
+              <label htmlFor="nombre">Nombre del Evento *</label>
+              <input 
+                type="text" 
+                id="nombre"
+                name="nombre" 
+                value={evento.nombre} 
+                onChange={handleChange} 
+                className="form-control" 
+                required 
+              />
+            </div>
 
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4 text-gray-700">Mobiliario Seleccionado</h2>
-        <ul className="space-y-2">
-          {selectedMobiliario.map((item, index) => (
-            <li key={index} className="flex justify-between items-center bg-gray-100 p-2 rounded">
-              <span>{item.producto} - <b>Cantidad: {item.cantidad}</b></span>
-              <button type="button" onClick={() => handleRemoveMobiliario(item)} className="text-red-500">Quitar</button>
-            </li>
-          ))}
-        </ul>
-      </div>
+            <div className="form-group">
+              <label htmlFor="tipo_evento">Tipo de Evento *</label>
+              <select 
+                id="tipo_evento"
+                name="tipo_evento" 
+                value={evento.tipo_evento} 
+                onChange={handleChange} 
+                className="form-control form-control-select" 
+                required
+              >
+                <option value="">Selecciona un tipo de evento</option>
+                {tiposEvento.map(tipo => (
+                  <option key={tipo.id} value={tipo.id}>
+                    {tipo.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-      <div className="flex justify-end mt-8">
-        <button type="button" onClick={() => navigate('/inventory/eventos')} className="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancelar</button>
-        <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">Guardar Evento</button>
-      </div>
-    </form>
+            <div className="form-group">
+              <label htmlFor="cantidad_personas">Cantidad de Personas *</label>
+              <input 
+                type="number" 
+                id="cantidad_personas"
+                name="cantidad_personas" 
+                value={evento.cantidad_personas} 
+                onChange={handleChange} 
+                className="form-control" 
+                min="1"
+                required 
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="responsable">Responsable *</label>
+              <input 
+                type="text" 
+                id="responsable"
+                name="responsable" 
+                value={evento.responsable} 
+                onChange={handleChange} 
+                className="form-control" 
+                required 
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="lugar">Lugar del Evento *</label>
+              <input 
+                type="text" 
+                id="lugar"
+                name="lugar" 
+                value={evento.lugar} 
+                onChange={handleChange} 
+                className="form-control" 
+                required 
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="estado">Estado del Evento</label>
+              <select 
+                id="estado"
+                name="estado" 
+                value={evento.estado} 
+                onChange={handleChange} 
+                className="form-control form-control-select"
+              >
+                <option value="Por iniciar">Por iniciar</option>
+                <option value="En proceso">En proceso</option>
+                <option value="Finalizado">Finalizado</option>
+                <option value="Cancelado">Cancelado</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="fecha_inicio">Fecha del Evento *</label>
+              <input 
+                type="date" 
+                id="fecha_inicio"
+                name="fecha_inicio" 
+                value={evento.fecha_inicio} 
+                onChange={handleChange} 
+                className="form-control" 
+                required 
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="hora_inicio">Hora de Inicio *</label>
+              <input 
+                type="time" 
+                id="hora_inicio"
+                name="hora_inicio" 
+                value={evento.hora_inicio} 
+                onChange={handleChange} 
+                className="form-control" 
+                required 
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="mobiliario-section">
+          <h2>Mobiliario Requerido</h2>
+          
+          <div className="mobiliario-selector">
+            <h3>Agregar Mobiliario</h3>
+            <MobiliarioSelector allMobiliario={allMobiliario} onAdd={handleAddMobiliario} />
+          </div>
+
+          {selectedMobiliario.length > 0 ? (
+            <div className="selected-mobiliario">
+              <h3>Mobiliario Seleccionado</h3>
+              <ul className="mobiliario-list">
+                {selectedMobiliario.map((item, index) => (
+                  <li key={`${item.id}-${index}`} className="mobiliario-item">
+                    <div className="mobiliario-info">
+                      <div className="mobiliario-name">{item.producto}</div>
+                      <div className="mobiliario-quantity">Cantidad: {item.cantidad}</div>
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={() => handleRemoveMobiliario(item)} 
+                      className="remove-mobiliario"
+                      title="Quitar"
+                    >
+                      ×
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div className="no-items-message">
+              No se ha seleccionado ningún mueble o equipo para este evento.
+            </div>
+          )}
+        </div>
+
+        <div className="form-actions">
+          <button 
+            type="button" 
+            onClick={() => navigate('/inventory/eventos')} 
+            className="btn btn-cancel"
+          >
+            Cancelar
+          </button>
+          <button 
+            type="submit" 
+            className="btn btn-submit"
+          >
+            {id ? 'Actualizar Evento' : 'Crear Evento'}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 

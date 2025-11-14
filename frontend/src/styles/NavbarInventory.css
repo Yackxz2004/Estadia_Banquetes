@@ -1,48 +1,144 @@
-.inventory-navbar {
-  width: 100%;
-  background-color: #343a40; /* Dark background */
-  padding: 1rem 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital@1&display=swap');
+
+:root {
+  --primary-color: #000000;
+  --accent-color: #D4AF37;
+  --text-color: #FFFFFF;
+  --navbar-bg: #1A1A1A;
+  --text-secondary: #B0B0B0;
 }
 
-.inventory-navbar-links {
+.inventory-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 5%;
+  background-color: var(--primary-color);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.inventory-navbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 100%);
+  z-index: -1;
+}
+
+/* Brand/Logo */
+.navbar-brand {
+  flex: 0 1 auto;
+}
+
+.navbar-brand a {
+  color: var(--text-color);
+  text-decoration: none;
+  font-size: 1.8rem;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
+}
+
+.navbar-brand a:hover {
+  color: var(--accent-color);
+}
+
+/* Navigation Links */
+.navbar-links {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.navbar-links ul {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-  justify-content: flex-start; /* Align items to the start */
-  gap: 2rem; /* Space between links */
+  align-items: center;
+  gap: 2rem;
 }
 
-.inventory-navbar-links li a {
-  color: #f8f9fa; /* Light text color */
+.navbar-links li {
+  position: relative;
+  padding: 0;
+}
+
+.navbar-links a {
+  color: var(--text-color);
   text-decoration: none;
-  font-size: 1.1rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.75rem;
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
   padding: 0.5rem 0;
   position: relative;
   transition: color 0.3s ease;
 }
 
-.inventory-navbar-links li a:hover {
-  color: #adb5bd; /* Lighter color on hover */
-  background-color: #555;
-}
-
-.inventory-navbar-links li a::after {
+.navbar-links a::after {
   content: '';
   position: absolute;
-  width: 100%;
-  height: 2px;
+  width: 0;
+  height: 1px;
   bottom: 0;
   left: 0;
-  background-color: #007bff; /* Blue underline */
-  transform: scaleX(0);
-  transform-origin: bottom right;
-  transition: transform 0.3s ease-out;
+  background-color: var(--accent-color);
+  transition: width 0.3s ease;
 }
 
-.inventory-navbar-links li a:hover::after {
-  transform: scaleX(1);
-  transform-origin: bottom left;
+.navbar-links a:hover {
+  color: var(--accent-color);
+}
+
+.navbar-links a:hover::after {
+  width: 100%;
+}
+
+.navbar-profile {
+  flex: 0 1 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-left: 2rem;
+}
+
+/* Notification Badge */
+.notification-badge {
+  background-color: var(--accent-color);
+  color: var(--primary-color);
+  border-radius: 50%;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-weight: 600;
+  position: relative;
+  top: -2px;
+  left: 6px;
+  border: 1px solid var(--navbar-bg);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .inventory-navbar {
+    padding: 0.75rem 2rem;
+  }
+  .navbar-links {
+    display: none;
+  }
 }

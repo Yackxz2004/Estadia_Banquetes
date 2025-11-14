@@ -1,47 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital@1&display=swap');
+
+:root {
+  --primary-color: #000000;
+  --accent-color: #D4AF37;
+  --text-color: #FFFFFF;
+}
+
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background-color: rgba(10, 10, 10, 0.8);
-  color: white;
+  padding: 1.5rem 5%;
+  background-color: var(--primary-color);
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 1000;
   box-sizing: border-box;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 100%);
+  z-index: -1;
 }
 
 .navbar-logo a {
-  color: white;
+  color: var(--text-color);
   text-decoration: none;
   font-size: 1.8rem;
-  font-family: 'Great Vibes', cursive; /* Misma fuente que el brand-name */
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
+}
+
+.navbar-logo a:hover {
+  color: var(--accent-color);
 }
 
 .navbar-links {
   list-style: none;
   display: flex;
+  align-items: center;
   margin: 0;
   padding: 0;
-}
-
-.navbar-links li {
-  margin-left: 20px;
+  gap: 2rem;
 }
 
 .navbar-links a {
-  color: white;
+  color: var(--text-color);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 5px 0;
-  border-bottom: 2px solid transparent;
-  transition: border-bottom 0.3s ease;
+  letter-spacing: 0.15em;
+  padding: 0.5rem 0;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.navbar-links a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--accent-color);
+  transition: width 0.3s ease;
 }
 
 .navbar-links a:hover {
-  border-bottom: 2px solid white;
+  color: var(--accent-color);
+}
+
+.navbar-links a:hover::after {
+  width: 100%;
+}
+
+/* Estilo especial para el botón de Reservar */
+.navbar-links li:last-child a {
+  background-color: var(--accent-color);
+  color: var(--primary-color) !important;
+  padding: 0.75rem 2rem !important;
+  border-radius: 0;
+  font-weight: 600 !important;
+  transition: all 0.3s ease;
+  border: 1px solid var(--accent-color);
+}
+
+.navbar-links li:last-child a:hover {
+  background-color: transparent;
+  color: var(--accent-color) !important;
+  text-decoration: none;
+}
+
+.navbar-links li:last-child a::after {
+  display: none;
+}
+
+/* Estilos para pantallas más pequeñas */
+@media (max-width: 1200px) {
+  .navbar {
+    padding: 1.2rem 5%;
+  }
+  
+  .navbar-links {
+    gap: 1.5rem;
+  }
+  
+  .navbar-links a {
+    font-size: 0.7rem;
+  }
+  
+  .navbar-links li:last-child a {
+    padding: 0.6rem 1.5rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 1rem 5%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .navbar-logo {
+    margin-bottom: 1rem;
+  }
+  
+  .navbar-links {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .navbar-links li:last-child {
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-links a {
+    font-size: 0.65rem;
+  }
+  
+  .navbar-links li:last-child a {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.7rem !important;
+  }
 }

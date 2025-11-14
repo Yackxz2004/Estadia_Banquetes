@@ -1,0 +1,308 @@
+/* Contenedor principal del calendario */
+.calendar-container {
+  padding: 2rem;
+  background-color: #1a1a1a;
+  min-height: 100vh;
+  color: #e0e0e0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.calendar-title {
+  text-align: center;
+  color: #ffffff;
+  margin-bottom: 2.5rem;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 1.8rem;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.calendar-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 2px;
+  background-color: #B8860B;
+}
+
+/* Estilos para el contenedor del calendario */
+.calendar-wrapper {
+  background-color: #1f1f1f;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border: 1px solid #2d2d2d;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+/* Estilos para los botones de navegación */
+.rbc-toolbar button {
+  color: #e0e0e0;
+  background-color: #2d2d2d;
+  border: 1px solid #3d3d3d;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  margin: 0 0.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rbc-toolbar button:hover {
+  background-color: #3d3d3d;
+  color: #ffffff;
+}
+
+.rbc-toolbar button:active,
+.rbc-toolbar button.rbc-active {
+  background-color: #B8860B;
+  color: white;
+  box-shadow: none;
+}
+
+/* Estilos para la cabecera del calendario */
+.rbc-header {
+  padding: 0.8rem 0.5rem;
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  border: 1px solid #3d3d3d;
+}
+
+/* Estilos para las celdas del calendario */
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+  background-color: #1f1f1f;
+  border: 1px solid #2d2d2d;
+}
+
+.rbc-month-row {
+  border-bottom: 1px solid #2d2d2d;
+}
+
+.rbc-day-bg + .rbc-day-bg,
+.rbc-header + .rbc-header {
+  border-left: 1px solid #2d2d2d;
+}
+
+.rbc-off-range-bg {
+  background-color: #252525;
+}
+
+.rbc-today {
+  background-color: rgba(184, 134, 11, 0.1);
+}
+
+/* Estilos para los eventos */
+.rbc-event {
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-size: 0.9em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rbc-event:hover {
+  opacity: 0.9 !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Estilos para el modal de detalles del evento */
+.event-details {
+  color: #e0e0e0;
+  line-height: 1.6;
+}
+
+.event-title {
+  color: #ffffff;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.event-type {
+  color: #B8860B;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 400;
+  text-transform: capitalize;
+}
+
+.event-times {
+  background-color: #252525;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  border-left: 3px solid #B8860B;
+}
+
+.event-times p {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+.event-details-list h4 {
+  color: #ffffff;
+  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.event-details-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.event-details-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #2d2d2d;
+  display: flex;
+  justify-content: space-between;
+}
+
+.event-details-list li:last-child {
+  border-bottom: none;
+}
+
+.event-details-list li strong {
+  color: #B8860B;
+  margin-right: 0.5rem;
+  min-width: 150px;
+}
+
+.no-details {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: #252525;
+  border-radius: 6px;
+}
+
+/* Estilos para el encabezado del modal */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #2d2d2d;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.8rem;
+  cursor: pointer;
+  padding: 0 0.5rem;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.close-button:hover {
+  color: #ffffff;
+}
+
+/* Estilos para el pie del modal */
+.modal-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #2d2d2d;
+  text-align: right;
+}
+
+.close-modal-btn {
+  background-color: #B8860B;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+.close-modal-btn:hover {
+  background-color: #d4a017;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(184, 134, 11, 0.3);
+}
+
+.close-modal-btn:active {
+  transform: translateY(0);
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .calendar-container {
+    padding: 1rem;
+  }
+  
+  .calendar-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .calendar-wrapper {
+    padding: 0.5rem;
+    border-radius: 6px;
+  }
+  
+  .rbc-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .rbc-toolbar .rbc-toolbar-label {
+    margin: 0.5rem 0;
+    text-align: center;
+  }
+  
+  .rbc-btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .rbc-btn-group button {
+    margin: 0.2rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .event-details-list li {
+    flex-direction: column;
+  }
+  
+  .event-details-list li strong {
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+}

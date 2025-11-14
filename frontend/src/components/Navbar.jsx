@@ -9,7 +9,7 @@ const Navbar = () => {
         <a href="#inicio">Boyas</a>
       </div>
       <ul className="navbar-links">
-        <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
+        <li><a href="#sobre-nosotros">Nosotros</a></li>
         <li><a href="#sociales">Sociales</a></li>
         <li><a href="#corporativos">Corporativos</a></li>
         <li><a href="#gubernamentales">Gubernamentales</a></li>

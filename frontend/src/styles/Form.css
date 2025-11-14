@@ -1,51 +1,559 @@
-.form-container {
+:root {
+  /* Escala de grises mejorada para mejor contraste */
+  --black: #000000;
+  --gray-900: #0A0A0A;      /* Fondo más oscuro */
+  --gray-850: #121212;      /* Fondo de página */
+  --gray-800: #1A1A1A;      /* Fondo de tarjeta */
+  --gray-750: #222222;      /* Fondo de tarjeta hover */
+  --gray-700: #2D2D2D;      /* Fondo de inputs */
+  --gray-650: #383838;      /* Bordes */
+  --gray-600: #444444;      /* Bordes hover */
+  --gray-500: #666666;      /* Texto secundario */
+  --gray-400: #888888;      /* Texto deshabilitado */
+  --gray-300: #AAAAAA;      /* Iconos */
+  --gray-200: #CCCCCC;      /* Texto secundario claro */
+  --gray-100: #E0E0E0;      /* Texto principal claro */
+  --white: #FFFFFF;         /* Texto principal */
+  
+  /* Colores base */
+  --bg-color: var(--gray-850);  /* Fondo de la página */
+  --card-bg: var(--gray-800);   /* Fondo del formulario */
+  --card-hover: var(--gray-750);
+  --input-bg: var(--gray-700);  /* Fondo de los campos */
+  --border-color: var(--gray-650);
+  
+  /* Colores de texto */
+  --text-color: var(--white);
+  --text-secondary: var(--gray-200);
+  --text-muted: var(--gray-400);
+  
+  /* Colores de acento - En escala de grises */
+  --primary-color: var(--gray-300);
+  --primary-hover: var(--gray-200);
+  --primary-active: var(--gray-400);
+  
+  /* Botones */
+  --btn-cancel-bg: var(--gray-700);
+  --btn-cancel-hover: var(--gray-600);
+  --btn-text: var(--white);
+  
+  /* Estados */
+  --error-color: #FF4D4D;
+  --success-color: #4CAF50;
+  --warning-color: #FFB74D;
+  
+  /* Efectos */
+  --border-radius: 4px; /* Reducido para coincidir con EventoForm */
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --transition: all 0.2s ease; /* Transición más suave como en EventoForm */
+  
+  /* Bordes */
+  --border: 1px solid var(--border-color);
+  --border-focus: 1px solid var(--primary-color);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
+  color: var(--text-color);
+}
+
+.form-page-wrapper {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Estilos base del contenedor principal */
+.form-page-wrapper {
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 50px auto;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
+  background: var(--bg-color);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Contenedor del formulario */
+.form-page-wrapper .form-container {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 450px;
+  padding: 2.5rem;
+  border: 1px solid var(--border-color);
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+
+/* Efecto sutil en las esquinas */
+.form-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), transparent);
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.form-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: var(--primary-color);
+  border-radius: 3px;
+}
+
+.form-page-wrapper .form-header h1 {
+  color: var(--white);
+  font-family: 'Great Vibes', cursive;
+  font-size: 3.5rem; /* Aumentamos el tamaño para la fuente cursiva */
+  font-weight: 400; /* Las fuentes cursivas suelen ser más delgadas */
+  margin-bottom: 1rem;
+  text-transform: none; /* Quitamos el uppercase para el estilo cursivo */
+  letter-spacing: 1px;
+}
+
+.form-page-wrapper .form-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 90%;
+  margin: 0 auto;
+  font-weight: 400;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+  position: relative;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin: 0 -0.5rem;
+}
+
+.form-row .form-group {
+  flex: 1;
+  margin: 0 0.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: var(--transition);
+}
+
+/* Estilos para los grupos de formulario */
+.form-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+/* Estilos para los campos de entrada */
 .form-input {
-  width: 90%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+  color: var(--text-color); /* Texto claro */
+  background-color: var(--input-bg); /* Fondo gris oscuro */
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  transition: all 0.25s ease;
+  font-family: 'Montserrat', sans-serif;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
+/* Efecto focus en los campos */
+.form-input:focus {
+  outline: none;
+  border-color: var(--gray-500);
+  box-shadow: 0 0 0 2px rgba(170, 170, 170, 0.2);
+  background-color: var(--input-bg);
+}
+
+/* Estilos para campos con error */
+.form-input.error {
+  border-color: var(--error-color) !important;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2) !important;
+}
+
+/* Mensajes de error debajo de cada campo */
+.error-text {
+  color: var(--error-color);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  display: block;
+  font-weight: 500;
+  padding-left: 5px;
+}
+
+/* Mensaje de error general (para errores de servidor, etc.) */
+.error-message {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #f8d7da;
+  padding: 1rem 1.25rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  border-left: 4px solid var(--error-color);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Icono para el mensaje de error general */
+.error-message::before {
+  content: '⚠️'; /* Icono de advertencia */
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.error-text {
+  color: var(--error-color);
+  font-size: 0.8rem;
+  margin-top: 0.4rem;
+  display: block;
+}
+
+.error-message {
+  background-color: #fff5f7;
+  color: var(--error-color);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  border-left: 4px solid var(--error-color);
+}
+
+/* Botón principal (submit) */
 .form-button {
-  width: 95%;
-  padding: 10px;
-  margin: 20px 0;
-  background-color: #007bff;
-  color: white;
+  /* Estilos base de btn */
+  padding: 0.8rem 1.8rem;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: 'Montserrat', sans-serif;
+
+  /* Estilos específicos */
+  width: 100%;
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  margin-top: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.form-button:hover {
-  background-color: #0056b3;
+/* Efecto hover para el botón principal */
+.form-button:not(:disabled):hover {
+  background-color: var(--gray-200);
+  color: var(--gray-900);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Efecto active para el botón principal */
+.form-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Estado deshabilitado */
+.form-button:disabled {
+  background-color: var(--btn-cancel-bg);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Botón secundario (cancelar/volver) */
+.btn-cancel {
+  /* Estilos base de btn */
+  padding: 0.8rem 1.8rem;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: 'Montserrat', sans-serif;
+
+  /* Estilos específicos */
+  background-color: var(--btn-cancel-bg);
+  color: var(--btn-text);
+  margin-right: 1rem;
+}
+
+.btn-cancel:hover {
+  background-color: var(--btn-cancel-hover);
+}
+
+/* Contenedor de botones para alineación */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  gap: 1rem;
+}
+
+/* Para pantallas pequeñas, apilar botones */
+@media (max-width: 480px) {
+  .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .btn-cancel {
+    margin-right: 0;
+    order: 2;
+  }
+  
+  .form-button {
+    order: 1;
+  }
+}
+
+/* Pie de formulario */
+.form-footer {
+  text-align: center;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  position: relative;
+}
+
+/* Estilo para el texto en el pie */
+.form-footer .form-link {
+  color: white; /* Texto en blanco */
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Estilo para el enlace de registro */
+.form-footer .register-link {
+  color: var(--accent-color) !important; /* Color dorado para el enlace */
+  text-decoration: none;
+  margin-left: 4px;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
+
+.form-footer .register-link:hover {
+  opacity: 0.9;
+  text-decoration: underline;
+}
+
+/* Estilo para el enlace de 'olvidé mi contraseña' */
 .forgot-password-link {
   display: block;
-  text-align: center;
-  margin-top: 15px;
-  color: #007bff;
+  margin-top: 1rem;
+  color: var(--text-muted) !important;
+  font-size: 0.85rem;
   text-decoration: none;
-  font-size: 14px;
-  transition: color 0.2s ease-in-out;
+  transition: color 0.2s ease;
 }
 
 .forgot-password-link:hover {
-  color: #0056b3;
   text-decoration: underline;
+  color: var(--text-secondary) !important;
+}
+
+/* Texto informativo adicional */
+.form-footer p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 1rem;
+  line-height: 1.5;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Línea sutil en la parte superior */
+.form-container::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  height: 2px;
+  background: var(--gray-400);
+  z-index: 1;
+  opacity: 0.7;
+}
+
+/* Efecto de iluminación sutil al hacer hover en el contenedor */
+.form-container:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .form-wrapper {
+    padding: 1rem;
+  }
+  
+  .form-container {
+    padding: 2rem 1.5rem;
+    margin: 1rem 0;
+    border-radius: 8px;
+  }
+  
+  .form-header h1 {
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-header p {
+    font-size: 0.9rem;
+    max-width: 100%;
+  }
+  
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+  
+  .form-input {
+    padding: 0.8rem 1rem;
+  }
+  
+  .form-button {
+    padding: 0.9rem;
+    font-size: 0.9rem;
+  }
+  
+  .form-footer {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+  }
+  
+  .form-link, .forgot-password-link {
+    font-size: 0.85rem;
+  }
+}
+
+/* Estilos para pantallas pequeñas (móviles) */
+@media (max-width: 480px) {
+  .form-container {
+    padding: 1.75rem 1.25rem;
+    border-radius: 6px;
+  }
+  
+  .form-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .form-header p {
+    font-size: 0.85rem;
+  }
+  
+  .form-group label {
+    font-size: 0.85rem;
+  }
+  
+  .form-input {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .form-button {
+    padding: 0.85rem;
+    font-size: 0.9rem;
+  }
+  
+  .form-footer {
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+  }
+  
+  .form-link, .forgot-password-link {
+    font-size: 0.85rem;
+    padding: 0.2rem 0.4rem;
+  }
+  
+  /* Mejorar la legibilidad en móviles */
+  body {
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  /* Asegurar que los inputs sean fáciles de tocar */
+  input, button, .form-button {
+    -webkit-tap-highlight-color: rgba(201, 169, 110, 0.3);
+  }
+}
+
+/* Ajustes para modo oscuro en navegadores compatibles */
+@media (prefers-color-scheme: dark) {
+  .form-container {
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .form-input {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .form-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(201, 169, 110, 0.2);
+  }
 }
