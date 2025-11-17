@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
 import '../styles/CategoryPage.css';
@@ -11,6 +11,7 @@ const UserCRUD = () => {
     const [error, setError] = useState(null);
     const [isCreating, setIsCreating] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
+    const formRef = useRef(null);
 
     useEffect(() => {
         getUsers();
@@ -41,6 +42,26 @@ const UserCRUD = () => {
         getUsers();
     };
 
+    const scrollToForm = () => {
+        setTimeout(() => {
+            formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    };
+
+    const handleCreateClick = () => {
+        setIsCreating(true);
+        setEditingUser(null);
+        // No hacemos scroll al crear un nuevo usuario
+    };
+
+    const handleEdit = (user) => {
+        setEditingUser(user);
+        // Solo hacemos scroll cuando se edita un usuario
+        setTimeout(() => {
+            scrollToForm();
+        }, 0);
+    };
+
     const deleteUser = (id) => {
         if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
             api.delete(`/api/users/delete/${id}/`)
@@ -59,10 +80,6 @@ const UserCRUD = () => {
         }
     };
 
-    const handleEdit = (user) => {
-        setEditingUser(user);
-    };
-
     if (loading) {
         return <div className="category-container"><p>Cargando usuarios...</p></div>;
     }
@@ -75,18 +92,25 @@ const UserCRUD = () => {
         <div className="category-container">
             <div className="header-actions">
                 <h1>Gestión de Usuarios</h1>
-                <button className="create-btn" onClick={() => setIsCreating(true)}>+ Crear Nuevo Usuario</button>
+                <button 
+                    className="create-btn" 
+                    onClick={handleCreateClick}
+                >
+                    + Crear Nuevo Usuario
+                </button>
             </div>
 
             {(isCreating || editingUser) && (
-                <CreateUserForm 
-                    user={editingUser}
-                    onSuccess={isCreating ? handleCreationSuccess : handleEditSuccess}
-                    onCancel={() => {
-                        setIsCreating(false);
-                        setEditingUser(null);
-                    }}
-                />
+                <div ref={formRef}>
+                    <CreateUserForm 
+                        user={editingUser}
+                        onSuccess={isCreating ? handleCreationSuccess : handleEditSuccess}
+                        onCancel={() => {
+                            setIsCreating(false);
+                            setEditingUser(null);
+                        }}
+                    />
+                </div>
             )}
 
             <table className="users-table">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FiUserPlus, FiSave, FiX } from 'react-icons/fi';
 import api from '../api';
 import '../styles/CreateUserForm.css';
 
@@ -72,7 +73,19 @@ const CreateUserForm = ({ onSuccess, onCancel, user }) => {
     return (
         <div className="form-container">
             <form onSubmit={handleSubmit} className="create-user-form">
-                <h2>{isEditing ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</h2>
+                <h2>
+                    {isEditing ? (
+                        <>
+                            <FiSave />
+                            Editar Usuario
+                        </>
+                    ) : (
+                        <>
+                            <FiUserPlus />
+                            Crear Nuevo Usuario
+                        </>
+                    )}
+                </h2>
                 {error && <p className="error-message">{error}</p>}
                 <div className="form-group">
                     <label htmlFor="username">Nombre de Usuario</label>
@@ -113,8 +126,23 @@ const CreateUserForm = ({ onSuccess, onCancel, user }) => {
                     </select>
                 </div>
                 <div className="form-actions">
-                    <button type="submit" className="btn-submit">{isEditing ? 'Actualizar Usuario' : 'Crear Usuario'}</button>
-                    <button type="button" className="btn-cancel" onClick={onCancel}>Cancelar</button>
+                    <button type="submit" className="btn-submit">
+                        {isEditing ? (
+                            <>
+                                <FiSave size={16} />
+                                Actualizar Usuario
+                            </>
+                        ) : (
+                            <>
+                                <FiUserPlus size={16} />
+                                Crear Usuario
+                            </>
+                        )}
+                    </button>
+                    <button type="button" className="btn-cancel" onClick={onCancel}>
+                        <FiX size={16} />
+                        Cancelar
+                    </button>
                 </div>
             </form>
         </div>

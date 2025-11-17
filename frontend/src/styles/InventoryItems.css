@@ -1,26 +1,97 @@
-.inventory-items-container {
-  padding: 2rem;
-  text-align: center;
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@300;400;600&display=swap');
+
+:root {
+  --bg-dark: #121212;
+  --card-bg: #1E1E1E;
+  --border-color: #3A3A3A;
+  --text-primary: #FFFFFF;
+  --text-secondary: #B0B0B0;
+  --accent-color: #B8860B;
+  --card-hover-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-.crud-links {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
+.inventory-items-container {
+  background-color: var(--bg-dark);
+  min-height: 100vh;
+  padding: 2rem 4rem;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.inventory-items-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.inventory-items-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.inventory-items-header p {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+}
+
+.crud-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
   margin-top: 2rem;
 }
 
-.crud-link {
-  display: inline-block;
-  padding: 1rem 2rem;
-  background-color: #28a745; /* A different color to distinguish */
-  color: white;
+.crud-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   text-decoration: none;
-  border-radius: 5px;
-  font-size: 1.2rem;
-  transition: background-color 0.3s ease;
+  color: var(--text-primary);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.crud-link:hover {
-  background-color: #218838;
+.crud-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--card-hover-shadow);
+  border-color: var(--accent-color);
+}
+
+.crud-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.crud-card:hover::before {
+  left: 100%;
+}
+
+.crud-card-icon {
+  margin-bottom: 1rem;
+  color: var(--accent-color);
+  font-size: 2.5rem;
+}
+
+.crud-card-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-top: 0.5rem;
 }

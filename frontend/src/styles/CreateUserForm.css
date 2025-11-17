@@ -1,78 +1,111 @@
 .form-container {
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
+    background-color: #2d2d2d; /* Fondo gris oscuro */
+    border: 1px solid #444; /* Borde gris más claro */
     border-radius: 8px;
     padding: 2rem;
     margin: 2rem auto;
     max-width: 500px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .create-user-form h2 {
     text-align: center;
     margin-bottom: 1.5rem;
-    color: #333;
+    color: #ffffff; /* Texto blanco */
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
 }
 
 .form-group {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #555;
+    font-weight: 500;
+    color: #e0e0e0; /* Texto gris claro */
+    font-size: 0.95rem;
 }
 
 .form-group input,
 .form-group select {
     width: 100%;
-    padding: 0.8rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 0.8rem 1rem;
+    border: 1px solid #444; /* Borde gris */
+    border-radius: 6px;
     font-size: 1rem;
+    background-color: #3a3a3a; /* Fondo de campos de entrada */
+    color: #ffffff; /* Texto blanco */
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #d4af37; /* Dorado al enfocar */
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
 }
 
 .form-actions {
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
-    margin-top: 1.5rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #444;
 }
 
 .btn-submit, .btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     padding: 0.8rem 1.5rem;
     border: none;
-    border-radius: 5px;
-    color: white;
-    font-size: 1rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .btn-submit {
-    background-color: #28a745; /* Verde */
+    background-color: #d4af37; /* Dorado */
+    color: #000000; /* Texto negro para mejor contraste */
 }
 
 .btn-submit:hover {
-    background-color: #218838;
+    background-color: #c5a227;
+    transform: translateY(-1px);
 }
 
 .btn-cancel {
-    background-color: #6c757d; /* Gris */
+    background-color: transparent;
+    border: 1px solid #666;
+    color: #e0e0e0;
 }
 
 .btn-cancel:hover {
-    background-color: #5a6268;
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .error-message {
-    color: #dc3545; /* Rojo */
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
+    color: #ff6b6b; /* Rojo más suave */
+    background-color: rgba(255, 107, 107, 0.1);
+    border: 1px solid rgba(255, 107, 107, 0.3);
     padding: 0.75rem 1.25rem;
-    border-radius: 0.25rem;
-    margin-bottom: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
     text-align: center;
+    font-size: 0.9rem;
+}
+
+/* Estilos para el ícono del título */
+.create-user-form h2 svg {
+    color: #d4af37; /* Dorado para el ícono */
 }

@@ -16,6 +16,7 @@ const actionItems = [
     { to: "/inventory/eventos", icon: Calendar, label: "Eventos" },
     { to: "/inventory/clientes", icon: Users, label: "Clientes" },
     { to: "/inventory/products", icon: LayoutGrid, label: "Productos" },
+    { to: "/inventory/items", icon: Box, label: "Inventario" },
     { to: "/inventory/bodegas", icon: Warehouse, label: "Bodegas" },
     { to: "/inventory/degustaciones", icon: HandPlatter, label: "Degustaciones" },
     { to: "/inventory/tipos-evento", icon: Star, label: "Tipos de Evento" },

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api';
 import { Link } from 'react-router-dom';
+import { FiPlus, FiEdit2, FiTrash2, FiTool, FiX } from 'react-icons/fi';
 import { getBodegas, enviarAMantenimiento, reintegrarDeMantenimiento } from '../api/inventory';
-import '../styles/CategoryPage.css';
+import '../styles/Cristaleria.css';
+import api from '../api';
 
 const Cristaleria = () => {
   const [items, setItems] = useState([]);
@@ -12,6 +13,7 @@ const Cristaleria = () => {
   const [currentItemId, setCurrentItemId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [mantenimientoModal, setMantenimientoModal] = useState({ isOpen: false, item: null, cantidad: 0 });
+  const [formModal, setFormModal] = useState({ isOpen: false, title: '' });
 
   useEffect(() => {
     fetchItems();
@@ -43,29 +45,37 @@ const Cristaleria = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = { ...formData, bodega: formData.bodega || null };
-    if (isEditing) {
-      try {
+    try {
+      if (isEditing) {
         await api.put(`/api/inventory/cristalerias/${currentItemId}/`, data);
-        setIsEditing(false);
-        setCurrentItemId(null);
-      } catch (error) {
-        console.error('Error updating item:', error);
-      }
-    } else {
-      try {
+      } else {
         await api.post('/api/inventory/cristalerias/', data);
-      } catch (error) {
-        console.error('Error creating item:', error);
       }
+      setFormModal({ isOpen: false, title: '' });
+      setFormData({ producto: '', descripcion: '', cantidad: '', bodega: '' });
+      fetchItems();
+    } catch (error) {
+      console.error('Error saving item:', error);
+      alert('Ocurrió un error al guardar. Por favor, inténtalo de nuevo.');
     }
-    setFormData({ producto: '', descripcion: '', cantidad: '', bodega: '' });
-    fetchItems();
   };
 
   const handleEdit = (item) => {
     setIsEditing(true);
     setCurrentItemId(item.id);
     setFormData({ producto: item.producto, descripcion: item.descripcion, cantidad: item.cantidad, bodega: item.bodega || '' });
+    setFormModal({ isOpen: true, title: 'Editar Cristalería' });
+  };
+
+  const openCreateModal = () => {
+    setIsEditing(false);
+    setCurrentItemId(null);
+    setFormData({ producto: '', descripcion: '', cantidad: '', bodega: '' });
+    setFormModal({ isOpen: true, title: 'Nuevo Elemento de Cristalería' });
+  };
+
+  const closeFormModal = () => {
+    setFormModal({ isOpen: false, title: '' });
   };
 
   const handleDelete = async (id) => {
@@ -89,16 +99,17 @@ const Cristaleria = () => {
 
   const handleMantenimientoAction = async (actionType) => {
     const { item, cantidad } = mantenimientoModal;
-    if (!cantidad || cantidad <= 0) {
+    const cantidadNum = Number(cantidad);
+    if (!cantidad || isNaN(cantidadNum) || cantidadNum <= 0) {
       alert('Por favor, ingresa una cantidad válida.');
       return;
     }
 
     try {
       if (actionType === 'enviar') {
-        await enviarAMantenimiento('cristalerias', item.id, parseInt(cantidad));
+        await enviarAMantenimiento('cristalerias', item.id, cantidadNum);
       } else if (actionType === 'reintegrar') {
-        await reintegrarDeMantenimiento('cristalerias', item.id, parseInt(cantidad));
+        await reintegrarDeMantenimiento('cristalerias', item.id, cantidadNum);
       }
       fetchItems();
       closeMantenimientoModal();
@@ -109,66 +120,224 @@ const Cristaleria = () => {
   };
 
   return (
-    <div className="category-container">
-      <h1>Gestión de Cristalería</h1>
-      <input type="text" className="search-bar" placeholder="Buscar..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-      
-      <form onSubmit={handleSubmit} className="category-form">
-        <input type="text" name="producto" value={formData.producto} onChange={handleInputChange} placeholder="Producto" required />
-        <input type="text" name="descripcion" value={formData.descripcion} onChange={handleInputChange} placeholder="Descripción" />
-        <input type="number" name="cantidad" value={formData.cantidad} onChange={handleInputChange} placeholder="Cantidad Disponible" required />
-        <select name="bodega" value={formData.bodega} onChange={handleInputChange}>
-          <option value="">Seleccionar Bodega</option>
-          {bodegas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
-        </select>
-        <button type="submit">{isEditing ? 'Actualizar' : 'Crear'}</button>
-      </form>
+    <div className="cristaleria-container">
+      <div className="cristaleria-header">
+        <h1 className="cristaleria-title">Gestión de Cristalería</h1>
+      </div>
 
-      <table className="category-table">
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Descripción</th>
-            <th>Bodega</th>
-            <th>Disponibles</th>
-            <th>En Mantenimiento</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map(item => (
-            <tr key={item.id}>
-              <td>{item.producto}</td>
-              <td>{item.descripcion}</td>
-              <td>{item.bodega_nombre || 'N/A'}</td>
-              <td>{item.cantidad}</td>
-              <td>{item.cantidad_en_mantenimiento}</td>
-              <td>
-                <button onClick={() => handleEdit(item)}>Editar</button>
-                <button onClick={() => handleDelete(item.id)}>Eliminar</button>
-                <button onClick={() => openMantenimientoModal(item)}>Mantenimiento</button>
-              </td>
+      <div className="search-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <input 
+          type="text" 
+          className="search-input" 
+          placeholder="Buscar cristalería..." 
+          value={searchTerm} 
+          onChange={(e) => setSearchTerm(e.target.value)} 
+        />
+        <button onClick={openCreateModal} className="create-btn">
+          <FiPlus /> Nuevo Elemento
+        </button>
+      </div>
+
+      <div className="table-responsive">
+        <table className="cristaleria-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Descripción</th>
+              <th>Bodega</th>
+              <th>Disponibles</th>
+              <th>En Mantenimiento</th>
+              <th>Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {items.length > 0 ? (
+              items.map(item => (
+                <tr key={item.id}>
+                  <td>
+                    <strong>{item.producto}</strong>
+                  </td>
+                  <td>{item.descripcion || 'N/A'}</td>
+                  <td>{item.bodega_nombre || 'N/A'}</td>
+                  <td>{item.cantidad}</td>
+                  <td>
+                    <span className={`status-badge ${item.cantidad_en_mantenimiento > 0 ? 'status-mantenimiento' : 'status-disponible'}`}>
+                      {item.cantidad_en_mantenimiento}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="action-buttons">
+                      <button onClick={() => handleEdit(item)} className="action-btn edit-btn" title="Editar">
+                        <FiEdit2 />
+                      </button>
+                      <button onClick={() => handleDelete(item.id)} className="action-btn delete-btn" title="Eliminar">
+                        <FiTrash2 />
+                      </button>
+                      <button 
+                        onClick={() => openMantenimientoModal(item)}
+                        className="action-btn mantenimiento-btn"
+                        title="Mantenimiento"
+                      >
+                        <FiTool />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="no-items">
+                  No se encontraron elementos de cristalería.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
+      {/* Modal de Formulario */}
+      {formModal.isOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2 className="modal-title">{formModal.title}</h2>
+              <button onClick={closeFormModal} className="modal-close">
+                <FiX />
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="cristaleria-form-modal">
+              <div className="form-group">
+                <label htmlFor="producto">Producto</label>
+                <input 
+                  type="text" 
+                  id="producto"
+                  name="producto" 
+                  value={formData.producto} 
+                  onChange={handleInputChange} 
+                  placeholder="Nombre del producto" 
+                  required 
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="descripcion">Descripción</label>
+                <input 
+                  type="text" 
+                  id="descripcion"
+                  name="descripcion" 
+                  value={formData.descripcion} 
+                  onChange={handleInputChange} 
+                  placeholder="Descripción detallada" 
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="cantidad">Cantidad Disponible</label>
+                <input 
+                  type="number" 
+                  id="cantidad"
+                  name="cantidad" 
+                  value={formData.cantidad} 
+                  onChange={handleInputChange} 
+                  placeholder="0" 
+                  min="0"
+                  required 
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="bodega">Bodega</label>
+                <select 
+                  id="bodega"
+                  name="bodega" 
+                  value={formData.bodega} 
+                  onChange={handleInputChange}
+                  className="bodega-selector"
+                >
+                  <option value="">Seleccionar Bodega</option>
+                  {bodegas.map(b => (
+                    <option key={b.id} value={b.id}>
+                      {b.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="btn-group">
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  onClick={closeFormModal}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                >
+                  {isEditing ? 'Actualizar' : 'Crear'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Mantenimiento */}
       {mantenimientoModal.isOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h2>Mantenimiento de: {mantenimientoModal.item.producto}</h2>
-            <p>Disponibles: {mantenimientoModal.item.cantidad} | En Mantenimiento: {mantenimientoModal.item.cantidad_en_mantenimiento}</p>
-            <input 
-              type="number" 
-              className="form-control mb-2" 
-              placeholder="Cantidad"
-              value={mantenimientoModal.cantidad} 
-              onChange={(e) => setMantenimientoModal({...mantenimientoModal, cantidad: e.target.value})} 
-            />
-            <div className="d-flex justify-content-between">
-              <button className="btn btn-warning" onClick={() => handleMantenimientoAction('enviar')}>Enviar a Mantenimiento</button>
-              <button className="btn btn-success" onClick={() => handleMantenimientoAction('reintegrar')}>Reintegrar de Mantenimiento</button>
-              <button className="btn btn-secondary" onClick={closeMantenimientoModal}>Cancelar</button>
+            <div className="modal-header">
+              <h2 className="modal-title">
+                Gestionar Mantenimiento: {mantenimientoModal.item?.producto}
+              </h2>
+              <button onClick={closeMantenimientoModal} className="modal-close">
+                <FiX />
+              </button>
+            </div>
+            <div className="form-group">
+              <label htmlFor="cantidad">Cantidad:</label>
+              <input
+                type="number"
+                id="cantidad"
+                min="1"
+                value={mantenimientoModal.cantidad}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || Number(value) > 0) {
+                    setMantenimientoModal({
+                      ...mantenimientoModal,
+                      cantidad: value === '' ? '' : Number(value)
+                    });
+                  }
+                }}
+                onKeyPress={(e) => {
+                  if (e.key === 'e' || e.key === 'E') {
+                    e.preventDefault();
+                  }
+                }}
+                className="form-control"
+                required
+              />
+            </div>
+            <div className="btn-group">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={closeMantenimientoModal}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn btn-warning"
+                onClick={() => handleMantenimientoAction('enviar')}
+              >
+                Enviar
+              </button>
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={() => handleMantenimientoAction('reintegrar')}
+              >
+                Reintegrar
+              </button>
             </div>
           </div>
         </div>
