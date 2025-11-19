@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { FiPlus, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
 import { getProducts, deleteProduct } from '../api/inventory';
+import '../styles/Products.css';
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -23,7 +25,7 @@ function Products() {
     if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
       try {
         await deleteProduct(id);
-        fetchProducts(); // Recargar la lista de productos
+        fetchProducts();
       } catch (error) {
         console.error('Error deleting product:', error);
       }
@@ -31,38 +33,70 @@ function Products() {
   };
 
   return (
-    <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Catálogo de Productos</h1>
-        <Link to="/inventory/products/new" className="btn btn-primary">Añadir Producto</Link>
+    <div className="products-container">
+      <div className="products-header">
+        <h1 className="products-title">Catálogo de Productos</h1>
       </div>
 
-      <div className="mb-3">
+      <div className="search-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <input
           type="text"
-          className="form-control"
+          className="search-input"
           placeholder="Buscar por nombre, descripción o color..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+        <Link to="/inventory/products/new" className="create-btn">
+          <FiPlus /> Nuevo Producto
+        </Link>
       </div>
 
-      <div className="row">
-        {products.map((product) => (
-          <div key={product.id} className="col-md-4 mb-4">
-            <div className="card">
-              {product.image && <img src={product.image} className="card-img-top" alt={product.name} />}
-              <div className="card-body">
-                <h5 className="card-title">{product.name}</h5>
-                <p className="card-text">{product.description}</p>
-                <p className="card-text"><small className="text-muted">Colores: {product.colors}</small></p>
-                <Link to={`/inventory/products/${product.id}`} className="btn btn-secondary btn-sm me-2">Editar</Link>
-                <button onClick={() => handleDelete(product.id)} className="btn btn-danger btn-sm">Eliminar</button>
+      <div className="products-grid">
+        {products.length > 0 ? (
+          products.map((product) => (
+            <div key={product.id} className="product-card">
+              <div className="product-image-container">
+                {product.image ? (
+                  <img src={product.image} className="product-image" alt={product.name} />
+                ) : (
+                  <div className="product-image-placeholder">
+                    <span>Sin imagen</span>
+                  </div>
+                )}
+              </div>
+              <div className="product-body">
+                <h3 className="product-name">{product.name}</h3>
+                <p className="product-description">{product.description || 'Sin descripción'}</p>
+                <p className="product-colors">
+                  <strong>Colores:</strong> {product.colors || 'N/A'}
+                </p>
+                <div className="product-actions">
+                  <Link 
+                    to={`/inventory/products/${product.id}`} 
+                    className="action-btn edit-btn" 
+                    title="Editar"
+                  >
+                    <FiEdit2 />
+                  </Link>
+                  <button 
+                    onClick={() => handleDelete(product.id)} 
+                    className="action-btn delete-btn"
+                    title="Eliminar"
+                  >
+                    <FiTrash2 />
+                  </button>
+                </div>
               </div>
             </div>
+          ))
+        ) : (
+          <div className="no-products">
+            <p>No se encontraron productos.</p>
           </div>
-        ))}
+        )}
       </div>
+
+      <Link to="/inventory/items" className="back-link">Volver a Inventario</Link>
     </div>
   );
 }

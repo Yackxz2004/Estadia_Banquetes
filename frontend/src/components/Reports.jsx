@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaFilePdf, FaFileExcel, FaSearch, FaCalendarAlt, FaBoxes, FaTools, FaChartBar, FaEye, FaDownload } from 'react-icons/fa';
+import { FiDownload, FiFileText, FiBarChart2, FiBox, FiTool, FiTrendingUp } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
@@ -552,12 +552,17 @@ const Reports = () => {
 
     return (
     <div className="reports-container">
-      <div className="tabs">
+      <div className="reports-header">
+        <h1 className="reports-title">Centro de Reportes</h1>
+        <p className="reports-subtitle">Genera y analiza reportes de tu negocio</p>
+      </div>
+
+      <div className="tabs-container">
         <button 
           className={`tab-button ${activeTab === 'events' ? 'active' : ''}`}
           onClick={() => setActiveTab('events')}
         >
-          Reportes de Eventos
+          <FiFileText /> Eventos
         </button>
         <button 
           className={`tab-button ${activeTab === 'inventory' ? 'active' : ''}`}
@@ -568,7 +573,7 @@ const Reports = () => {
             }
           }}
         >
-          Reporte de Inventario
+          <FiBox /> Inventario
         </button>
         <button 
           className={`tab-button ${activeTab === 'warehouse' ? 'active' : ''}`}
@@ -579,7 +584,7 @@ const Reports = () => {
             }
           }}
         >
-          Inventario por Bodega
+          <FiBarChart2 /> Bodegas
         </button>
         <button 
           className={`tab-button ${activeTab === 'maintenance' ? 'active' : ''}`}
@@ -590,7 +595,7 @@ const Reports = () => {
             }
           }}
         >
-          Reporte de Mantenimiento
+          <FiTool /> Mantenimiento
         </button>
         <button 
           className={`tab-button ${activeTab === 'analysis' ? 'active' : ''}`}
@@ -601,7 +606,7 @@ const Reports = () => {
             }
           }}
         >
-          Análisis de Eventos
+          <FiTrendingUp /> Análisis
         </button>
       </div>
 
@@ -633,10 +638,10 @@ const Reports = () => {
           {events.length > 0 && (
             <div className="report-actions">
               <button onClick={generatePDF} className="btn btn-export">
-                Exportar a PDF
+                <FiDownload /> Exportar a PDF
               </button>
               <button onClick={() => generateExcel('events')} className="btn btn-export">
-                Exportar a Excel
+                <FiDownload /> Exportar a Excel
               </button>
             </div>
           )}
@@ -683,14 +688,14 @@ const Reports = () => {
               className="btn btn-export"
               disabled={inventoryItems.length === 0}
             >
-              Exportar a PDF
+              <FiDownload /> Exportar a PDF
             </button>
             <button 
               onClick={() => generateExcel('inventory')} 
               className="btn btn-export"
               disabled={inventoryItems.length === 0}
             >
-              Exportar a Excel
+              <FiDownload /> Exportar a Excel
             </button>
           </div>
           
@@ -738,13 +743,13 @@ const Reports = () => {
                 onClick={generateWarehousePDF} 
                 className="btn btn-export"
               >
-                Exportar a PDF
+                <FiDownload /> Exportar a PDF
               </button>
               <button 
                 onClick={generateWarehouseExcel} 
                 className="btn btn-export"
               >
-                Exportar a Excel
+                <FiDownload /> Exportar a Excel
               </button>
             </div>
           )}
@@ -863,14 +868,14 @@ const Reports = () => {
               className="btn btn-export"
               disabled={maintenanceItems.length === 0}
             >
-              Exportar a PDF
+              <FiDownload /> Exportar a PDF
             </button>
             <button 
               onClick={() => generateExcel('maintenance')} 
               className="btn btn-export"
               disabled={maintenanceItems.length === 0}
             >
-              Exportar a Excel
+              <FiDownload /> Exportar a Excel
             </button>
           </div>
           
@@ -938,14 +943,14 @@ const Reports = () => {
                 className="btn btn-export"
                 disabled={!eventAnalysisData || eventAnalysisData.periods.length === 0}
               >
-                Exportar a PDF
+                <FiDownload /> Exportar a PDF
               </button>
               <button 
                 onClick={() => generateExcel('analysis')} 
                 className="btn btn-export"
                 disabled={!eventAnalysisData || eventAnalysisData.periods.length === 0}
               >
-                Exportar a Excel
+                <FiDownload /> Exportar a Excel
               </button>
             </div>
           )}

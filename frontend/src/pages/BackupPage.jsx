@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FiDownload, FiUpload, FiAlertTriangle, FiCheckCircle, FiX } from 'react-icons/fi';
 import api from '../api';
 import '../styles/BackupPage.css';
 
@@ -6,16 +7,14 @@ const BackupPage = () => {
     const [file, setFile] = useState(null);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
-    // 💡 Nuevo estado para manejar si una operación está en curso
     const [isLoading, setIsLoading] = useState(false);
 
-    // --- Manejadores de Descarga ---
     const handleDownload = () => {
-        if (isLoading) return; // Evitar doble clic
+        if (isLoading) return;
         
         setMessage('Generando respaldo...');
         setError('');
-        setIsLoading(true); // Iniciar carga
+        setIsLoading(true);
 
         api.get('/api/inventory/backup/create/', { responseType: 'blob' })
             .then(response => {
@@ -45,11 +44,10 @@ const BackupPage = () => {
                 setMessage('');
             })
             .finally(() => {
-                setIsLoading(false); // Detener carga
+                setIsLoading(false);
             });
     };
 
-    // --- Manejadores de Restauración ---
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
         setError('');
@@ -58,16 +56,15 @@ const BackupPage = () => {
 
     const handleUpload = (e) => {
         e.preventDefault();
-        if (isLoading) return; // Evitar doble clic
+        if (isLoading) return;
 
         if (!file) {
             setError('Por favor, selecciona un archivo para restaurar.');
             return;
         }
 
-        // ⚠️ Paso 1: Confirmación de Seguridad
         if (!window.confirm('ADVERTENCIA: Esta acción es irreversible. ¿Estás seguro de que deseas restaurar la base de datos? Esto sobreescribirá todos los datos actuales.')) {
-            return; // Cancelar si el usuario dice NO
+            return;
         }
 
         const formData = new FormData();
@@ -75,9 +72,8 @@ const BackupPage = () => {
         
         setMessage('Restaurando base de datos...');
         setError('');
-        setIsLoading(true); // Iniciar carga
+        setIsLoading(true);
 
-        // ⚠️ La restauración puede tomar tiempo. Es importante mantener isLoading activo.
         api.post('/api/inventory/backup/restore/', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -86,63 +82,103 @@ const BackupPage = () => {
         .then(response => {
             setMessage('Restauración completada exitosamente. Es posible que necesites recargar la página para ver los cambios.');
             setFile(null);
-            // Limpiar el input de archivo después de un éxito (opcional)
             e.target.reset(); 
         })
         .catch(err => {
             console.error('Error restoring backup:', err);
-            // Intenta obtener un mensaje de error más específico si está disponible
             const specificError = err.response?.data?.detail || 'Asegúrate de que sea un archivo de respaldo válido.';
             setError(`Error al restaurar el respaldo: ${specificError}`);
             setMessage('');
         })
         .finally(() => {
-            setIsLoading(false); // Detener carga
+            setIsLoading(false);
         });
     };
 
-    // --- Renderizado del Componente ---
     return (
         <div className="backup-container">
-            <h2>Respaldo y Restauración</h2>
-            {message && <p className="message success">{message}</p>}
-            {error && <p className="message error">{error}</p>}
-            
-            <div className="backup-section">
-                <h3>Descargar Respaldo Actual</h3>
-                <p>Crea y descarga una copia de seguridad de la base de datos actual.</p>
-                {/* 🔒 Botón deshabilitado durante la carga */}
-                <button 
-                    onClick={handleDownload} 
-                    className="btn btn-primary"
-                    disabled={isLoading}
-                >
-                    {isLoading ? 'Generando...' : 'Descargar Respaldo'}
-                </button>
+            <div className="backup-header">
+                <h1 className="backup-title">Respaldo y Restauración</h1>
+                <p className="backup-subtitle">Gestiona copias de seguridad de tu base de datos</p>
             </div>
-            
-            <hr />
 
-            <div className="backup-section">
-                <h3>Restaurar desde Respaldo</h3>
-                <p>Selecciona un archivo de respaldo para restaurar la base de datos. <strong>Advertencia:</strong> Esta acción sobreescribirá todos los datos actuales y es irreversible.</p>
-                <form onSubmit={handleUpload}>
-                    <input 
-                        type="file" 
-                        onChange={handleFileChange} 
-                        className="form-control-file" 
-                        // Deshabilitar el input mientras está cargando
-                        disabled={isLoading} 
-                    />
-                    {/* 🔒 Botón deshabilitado si está cargando O si no hay archivo */}
+            {message && (
+                <div className="alert alert-success">
+                    <FiCheckCircle className="alert-icon" />
+                    <p>{message}</p>
+                </div>
+            )}
+            {error && (
+                <div className="alert alert-error">
+                    <FiAlertTriangle className="alert-icon" />
+                    <p>{error}</p>
+                </div>
+            )}
+
+            <div className="backup-grid">
+                {/* Sección de Descarga */}
+                <div className="backup-card">
+                    <div className="card-icon download-icon">
+                        <FiDownload />
+                    </div>
+                    <h2 className="card-title">Descargar Respaldo</h2>
+                    <p className="card-description">
+                        Crea y descarga una copia de seguridad completa de la base de datos actual.
+                    </p>
+                    <div className="card-features">
+                        <ul>
+                            <li>✓ Copia completa de todos los datos</li>
+                            <li>✓ Archivo comprimido y seguro</li>
+                            <li>✓ Descarga automática</li>
+                        </ul>
+                    </div>
                     <button 
-                        type="submit" 
-                        className="btn btn-danger" 
-                        disabled={isLoading || !file}
+                        onClick={handleDownload} 
+                        className="btn btn-primary"
+                        disabled={isLoading}
                     >
-                        {isLoading ? 'Restaurando...' : 'Restaurar Base de Datos'}
+                        <FiDownload /> {isLoading ? 'Generando...' : 'Descargar Respaldo'}
                     </button>
-                </form>
+                </div>
+
+                {/* Sección de Restauración */}
+                <div className="backup-card">
+                    <div className="card-icon upload-icon">
+                        <FiUpload />
+                    </div>
+                    <h2 className="card-title">Restaurar Respaldo</h2>
+                    <p className="card-description">
+                        Restaura la base de datos desde un archivo de respaldo anterior.
+                    </p>
+                    <div className="card-features">
+                        <ul>
+                            <li>⚠ Sobreescribe todos los datos actuales</li>
+                            <li>⚠ Acción irreversible</li>
+                            <li>⚠ Requiere confirmación</li>
+                        </ul>
+                    </div>
+                    <form onSubmit={handleUpload} className="restore-form">
+                        <div className="file-input-wrapper">
+                            <input 
+                                type="file" 
+                                onChange={handleFileChange} 
+                                className="file-input"
+                                disabled={isLoading}
+                                accept=".sqlite3,.db,.backup"
+                            />
+                            <span className="file-input-label">
+                                {file ? file.name : 'Selecciona un archivo de respaldo...'}
+                            </span>
+                        </div>
+                        <button 
+                            type="submit" 
+                            className="btn btn-danger" 
+                            disabled={isLoading || !file}
+                        >
+                            <FiUpload /> {isLoading ? 'Restaurando...' : 'Restaurar Base de Datos'}
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     );
