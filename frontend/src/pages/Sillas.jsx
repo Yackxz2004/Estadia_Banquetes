@@ -343,7 +343,7 @@ const Sillas = () => {
         </div>
       )}
 
-      <Link to="/inventory/items" className="back-link">Volver a Inventario</Link>
+      <Link to="/inventory" className="back-link" style={{ marginTop: "20px", display: "inline-block" }}>Volver a Inventario</Link>
     </div>
   );
 };

@@ -5,7 +5,7 @@
     background: white;
     padding: 2rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .config-sidebar {
@@ -59,7 +59,8 @@
     color: #333;
 }
 
-.form-group input, .form-group textarea {
+.form-group input,
+.form-group textarea {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -102,20 +103,31 @@
     object-fit: cover;
 }
 
-.delete-btn {
+.image-card .delete-btn {
     position: absolute;
     top: 5px;
     right: 5px;
-    background: rgba(255, 0, 0, 0.8);
-    color: white;
-    border: none;
-    border-radius: 50%;
     width: 24px;
     height: 24px;
-    cursor: pointer;
+    border-radius: 50%;
+    background-color: white;
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0;
+    transition: all 0.2s;
+    z-index: 2;
+}
+
+.image-card .delete-btn:hover {
+    background-color: #ff6b6b;
+    color: white;
+    transform: scale(1.1);
 }
 
 .upload-card {

@@ -29,4 +29,11 @@ export const uploadHomeSectionImage = (name, formData) =>
 export const deleteHomeSectionImage = (name, imageId) =>
   api.post(`api/inventory/home-sections/${name}/delete_image/`, { image_id: imageId });
 
+// Invitations API
+export const getInvitations = () => api.get("api/inventory/invitaciones/");
+export const getInvitation = (id) => api.get(`api/inventory/invitaciones/${id}/`);
+export const createInvitation = (data) => api.post("api/inventory/invitaciones/", data);
+export const updateInvitation = (id, data) => api.put(`api/inventory/invitaciones/${id}/`, data);
+export const deleteInvitation = (id) => api.delete(`api/inventory/invitaciones/${id}/`);
+
 export default api;

@@ -35,6 +35,7 @@ import Notifications from "./pages/Notifications";
 import BackupPage from "./pages/BackupPage";
 import Invitaciones from "./pages/Invitaciones";
 import InvitacionBoda from "./pages/InvitacionBoda";
+import InvitacionForm from "./pages/InvitacionForm";
 import HomeConfig from "./pages/HomeConfig";
 
 function Logout() {
@@ -311,6 +312,22 @@ function App() {
           element={
             <ProtectedRoute>
               <Invitaciones />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory/invitaciones/new"
+          element={
+            <ProtectedRoute>
+              <InvitacionForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory/invitaciones/edit/:id"
+          element={
+            <ProtectedRoute>
+              <InvitacionForm />
             </ProtectedRoute>
           }
         />

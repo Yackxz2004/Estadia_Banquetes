@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import (
     TipoEvento, Bodega, Cliente, Manteleria, Cubierto, Loza, Cristaleria, Silla, Mesa, SalaLounge, 
     Periquera, Carpa, PistaTarima, Extra, Evento, EventoMobiliario, Degustacion, DegustacionMobiliario, Product, Notification,
-    HomeSection, HomeSectionImage
+    HomeSection, HomeSectionImage, Invitation
 )
 from django.contrib.contenttypes.models import ContentType
 
@@ -166,3 +166,8 @@ class HomeSectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomeSection
         fields = ['id', 'name', 'title', 'description', 'extra_text', 'images']
+
+class InvitationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invitation
+        fields = ['id', 'titulo', 'descripcion', 'festejados', 'fecha', 'hora', 'lugar', 'direccion', 'mensaje', 'theme']

@@ -1,0 +1,170 @@
+.invitaciones-wrapper {
+    background-color: #1a1a1a;
+    min-height: 100vh;
+    padding-top: 100px;
+    padding-bottom: 50px;
+    color: white;
+}
+
+.invitaciones-max-width {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.invitaciones-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.invitaciones-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--accent-color, #e0a96d);
+    margin-bottom: 10px;
+}
+
+.invitaciones-subtitle {
+    color: #ccc;
+    font-size: 1.1rem;
+}
+
+.btn-crear-invitacion {
+    background-color: var(--accent-color, #e0a96d);
+    color: #1a1a1a;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-crear-invitacion:hover {
+    background-color: #c8955a;
+    transform: translateY(-2px);
+}
+
+.invitaciones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.invitacion-card {
+    background-color: #2a2a2a;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    text-decoration: none;
+    color: white;
+    transition: all 0.3s ease;
+    position: relative;
+    border: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+}
+
+.invitacion-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.4);
+    border-color: var(--accent-color, #e0a96d);
+}
+
+.invitacion-card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 12px;
+    color: white;
+}
+
+.invitacion-card-desc {
+    color: #aaa;
+    margin-bottom: 8px;
+    flex-grow: 1;
+}
+
+.invitacion-card-festejados {
+    color: var(--accent-color, #e0a96d);
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.invitacion-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #444;
+    padding-top: 15px;
+    font-size: 0.9rem;
+    color: #ddd;
+}
+
+.icon-arrow {
+    font-size: 1.2rem;
+    color: var(--accent-color, #e0a96d);
+}
+
+.action-buttons-wrapper {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.invitacion-card:hover .action-buttons-wrapper {
+    opacity: 1;
+}
+
+.btn-edit-invitacion {
+    background-color: #fff;
+    color: #1a1a1a;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-edit-invitacion:hover {
+    background-color: #ddd;
+}
+
+.btn-delete-invitacion {
+    background-color: #ef4444;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-delete-invitacion:hover {
+    background-color: #dc2626;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 50px;
+    background-color: #2a2a2a;
+    border-radius: 12px;
+    border: 1px dashed #555;
+    color: #aaa;
+}
+
+.loading-state {
+    text-align: center;
+    padding: 50px;
+    color: white;
+    font-size: 1.2rem;
+}

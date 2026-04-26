@@ -208,15 +208,13 @@ const TipoEventoCRUD = () => {
                                                 }}
                                                 className="action-btn edit-btn"
                                             >
-                                                <FiEdit2 size={16} />
-                                                <span>Editar</span>
+                                                <FiEdit2 size={18} />
                                             </button>
                                             <button 
                                                 onClick={() => deleteTipoEvento(tipo.id)}
                                                 className="action-btn delete-btn"
                                             >
-                                                <FiTrash2 size={16} />
-                                                <span>Eliminar</span>
+                                                <FiTrash2 size={18} />
                                             </button>
                                         </div>
                                     </td>
@@ -230,8 +228,9 @@ const TipoEventoCRUD = () => {
                     </div>
                 )}
             </div>
-        </div>
-    );
+        
+      <Link to="/inventory" className="back-link" style={{ marginTop: "20px", display: "inline-block" }}>Volver a Inventario</Link>
+    </div>
+  );
 };
-
 export default TipoEventoCRUD;

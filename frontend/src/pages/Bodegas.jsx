@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { FiPlus, FiTrash2, FiEdit2, FiPackage, FiMapPin, FiInfo, FiX, FiSave } from 'react-icons/fi';
 import { toast } from 'react-toastify';
@@ -347,8 +348,9 @@ const Bodegas = () => {
           </tbody>
         </table>
       )}
+    
+      <Link to="/inventory" className="back-link" style={{ marginTop: "20px", display: "inline-block" }}>Volver a Inventario</Link>
     </div>
   );
 };
-
 export default Bodegas;

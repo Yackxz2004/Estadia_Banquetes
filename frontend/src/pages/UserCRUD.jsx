@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 import api from '../api';
 import '../styles/CategoryPage.css';
 import '../styles/UserCRUD.css';
@@ -131,14 +132,14 @@ const UserCRUD = () => {
                             <td>{user.email || 'No especificado'}</td>
                             <td>{user.rol || 'No asignado'}</td>
                             <td>
-                                <button className="action-btn edit-btn" onClick={() => handleEdit(user)}>Editar</button>
-                                <button className="action-btn delete-btn" onClick={() => deleteUser(user.id)}>Eliminar</button>
+                                <button className="action-btn edit-btn" onClick={() => handleEdit(user)} title="Editar"><FiEdit2 /></button>
+                                <button className="action-btn delete-btn" onClick={() => deleteUser(user.id)} title="Eliminar"><FiTrash2 /></button>
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
-            <Link to="/inventory" className="back-link">Volver al Panel</Link>
+            <Link to="/inventory" className="back-link" style={{ marginTop: "20px", display: "inline-block" }}>Volver a Inventario</Link>
         </div>
     );
 };

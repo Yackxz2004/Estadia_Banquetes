@@ -7,6 +7,7 @@ import '../styles/Clientes.css';
 
 const Clientes = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [clientes, setClientes] = useState([]);
   const [tiposEvento, setTiposEvento] = useState([]);
   const [newCliente, setNewCliente] = useState({
@@ -44,29 +45,53 @@ const Clientes = () => {
     setNewCliente({ ...newCliente, [name]: value });
   };
 
+  const resetForm = () => {
+    setNewCliente({
+      nombre: '',
+      apellido: '',
+      tipo_evento: '',
+      cantidad_aprox: '',
+      numero: '',
+      comentarios: '',
+    });
+    setEditingId(null);
+    setIsFormOpen(false);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    api
-      .post('/api/inventory/clientes/', newCliente)
-      .then((res) => {
-        if (res.status === 201) {
-          toast.success('¡Cliente creado exitosamente!');
-          getClientes();
-          setNewCliente({
-            nombre: '',
-            apellido: '',
-            tipo_evento: '',
-            cantidad_aprox: '',
-            numero: '',
-            comentarios: '',
-          });
-          setIsFormOpen(false);
-        }
-      })
-      .catch((err) => {
-        console.error('Error creating client:', err);
-        toast.error('Error al crear el cliente');
-      });
+
+    if (editingId) {
+      // Update existing client
+      api
+        .put(`/api/inventory/clientes/${editingId}/`, newCliente)
+        .then((res) => {
+          if (res.status === 200) {
+            toast.success('¡Cliente actualizado exitosamente!');
+            getClientes();
+            resetForm();
+          }
+        })
+        .catch((err) => {
+          console.error('Error updating client:', err);
+          toast.error('Error al actualizar el cliente');
+        });
+    } else {
+      // Create new client
+      api
+        .post('/api/inventory/clientes/', newCliente)
+        .then((res) => {
+          if (res.status === 201) {
+            toast.success('¡Cliente creado exitosamente!');
+            getClientes();
+            resetForm();
+          }
+        })
+        .catch((err) => {
+          console.error('Error creating client:', err);
+          toast.error('Error al crear el cliente');
+        });
+    }
   };
 
   // Helper to get event name from ID
@@ -76,7 +101,24 @@ const Clientes = () => {
   };
 
   const toggleForm = () => {
-    setIsFormOpen(!isFormOpen);
+    if (isFormOpen) {
+      resetForm();
+    } else {
+      setIsFormOpen(true);
+    }
+  };
+
+  const handleEdit = (cliente) => {
+    setNewCliente({
+      nombre: cliente.nombre,
+      apellido: cliente.apellido,
+      tipo_evento: cliente.tipo_evento,
+      cantidad_aprox: cliente.cantidad_aprox,
+      numero: cliente.numero,
+      comentarios: cliente.comentarios || '',
+    });
+    setEditingId(cliente.id);
+    setIsFormOpen(true);
   };
 
   const handleDelete = (id) => {
@@ -100,7 +142,7 @@ const Clientes = () => {
         <h1 className="clientes-title">Gestión de Clientes</h1>
         <button className="create-btn" onClick={toggleForm}>
           <FiPlus size={18} style={{ marginRight: '8px' }} />
-          {isFormOpen ? 'Ocultar formulario' : 'Nuevo Cliente'}
+          {isFormOpen ? 'Cancelar' : 'Nuevo Cliente'}
         </button>
       </div>
 
@@ -108,38 +150,38 @@ const Clientes = () => {
         <div className="clientes-form">
           <h2 style={{ color: 'var(--accent-color)', marginBottom: '1.5rem' }}>
             <FiUser style={{ marginRight: '10px' }} />
-            Agregar Nuevo Cliente
+            {editingId ? 'Editar Cliente' : 'Agregar Nuevo Cliente'}
           </h2>
           <form onSubmit={handleSubmit}>
             <div className="form-grid">
               <div className="form-group">
                 <label>Nombre</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   className="form-control"
-                  name="nombre" 
-                  value={newCliente.nombre} 
-                  onChange={handleInputChange} 
-                  required 
+                  name="nombre"
+                  value={newCliente.nombre}
+                  onChange={handleInputChange}
+                  required
                 />
               </div>
               <div className="form-group">
                 <label>Apellido</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   className="form-control"
-                  name="apellido" 
-                  value={newCliente.apellido} 
-                  onChange={handleInputChange} 
-                  required 
+                  name="apellido"
+                  value={newCliente.apellido}
+                  onChange={handleInputChange}
+                  required
                 />
               </div>
               <div className="form-group">
                 <label>Tipo de Evento</label>
-                <select 
+                <select
                   className="form-control"
-                  name="tipo_evento" 
-                  value={newCliente.tipo_evento} 
+                  name="tipo_evento"
+                  value={newCliente.tipo_evento}
                   onChange={handleInputChange}
                   required
                 >
@@ -153,44 +195,53 @@ const Clientes = () => {
               </div>
               <div className="form-group">
                 <label>Cantidad Aprox.</label>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   className="form-control"
-                  name="cantidad_aprox" 
-                  value={newCliente.cantidad_aprox} 
-                  onChange={handleInputChange} 
-                  required 
+                  name="cantidad_aprox"
+                  value={newCliente.cantidad_aprox}
+                  onChange={handleInputChange}
+                  required
                 />
               </div>
               <div className="form-group">
                 <label>Número de Teléfono</label>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <FiPhone style={{ marginRight: '10px', color: 'var(--accent-color)' }} />
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="form-control"
-                    name="numero" 
-                    value={newCliente.numero} 
-                    onChange={handleInputChange} 
-                    required 
+                    name="numero"
+                    value={newCliente.numero}
+                    onChange={handleInputChange}
+                    required
                     style={{ flex: 1 }}
                   />
                 </div>
               </div>
               <div className="form-group">
                 <label>Comentarios</label>
-                <textarea 
+                <textarea
                   className="form-control"
-                  name="comentarios" 
-                  value={newCliente.comentarios} 
-                  onChange={handleInputChange} 
+                  name="comentarios"
+                  value={newCliente.comentarios}
+                  onChange={handleInputChange}
                   rows="3"
                 />
               </div>
             </div>
             <button type="submit" className="submit-btn">
-              <FiPlus size={16} style={{ marginRight: '8px' }} />
-              Agregar Cliente
+              {editingId ? (
+                <>
+                  <FiEdit2 size={16} style={{ marginRight: '8px' }} />
+                  Actualizar Cliente
+                </>
+              ) : (
+                <>
+                  <FiPlus size={16} style={{ marginRight: '8px' }} />
+                  Agregar Cliente
+                </>
+              )}
             </button>
           </form>
         </div>
@@ -220,28 +271,23 @@ const Clientes = () => {
                   <td>{getEventName(cliente.tipo_evento)}</td>
                   <td>{cliente.cantidad_aprox}</td>
                   <td>{cliente.numero}</td>
-                  <td style={{ maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} 
-                      title={cliente.comentarios}>
+                  <td style={{ maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                    title={cliente.comentarios}>
                     {cliente.comentarios || '-'}
                   </td>
                   <td>
                     <div className="action-buttons">
-                      <button 
+                      <button
                         className="action-btn edit-btn"
-                        onClick={() => {
-                          // Implementar edición aquí
-                          toast.success('Función de edición en desarrollo');
-                        }}
+                        onClick={() => handleEdit(cliente)}
                       >
-                        <FiEdit2 size={16} />
-                        <span>Editar</span>
+                        <FiEdit2 size={18} />
                       </button>
                       <button
                         className="action-btn delete-btn"
                         onClick={() => handleDelete(cliente.id)}
                       >
-                        <FiTrash2 size={16} />
-                        <span>Eliminar</span>
+                        <FiTrash2 size={18} />
                       </button>
                     </div>
                   </td>
@@ -257,8 +303,9 @@ const Clientes = () => {
           </tbody>
         </table>
       </div>
+    
+      <Link to="/inventory" className="back-link" style={{ marginTop: "20px", display: "inline-block" }}>Volver a Inventario</Link>
     </div>
   );
 };
-
 export default Clientes;

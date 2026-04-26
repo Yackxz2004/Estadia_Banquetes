@@ -13,13 +13,13 @@ from django.contrib.contenttypes.models import ContentType
 # Importaciones de Modelos y Serializadores (Se mantienen al final)
 from .models import (
     TipoEvento, Bodega, Cliente, Manteleria, Cubierto, Loza, Cristaleria, Silla, Mesa, SalaLounge, 
-    Periquera, Carpa, PistaTarima, Extra, Evento, EventoMobiliario, Degustacion, DegustacionMobiliario, Product, Notification, HomeSection, HomeSectionImage
+    Periquera, Carpa, PistaTarima, Extra, Evento, EventoMobiliario, Degustacion, DegustacionMobiliario, Product, Notification, HomeSection, HomeSectionImage, Invitation
 )
 from .serializers import (
     TipoEventoSerializer, BodegaSerializer, ClienteSerializer, ManteleriaSerializer, CubiertoSerializer, 
     LozaSerializer, CristaleriaSerializer, SillaSerializer, MesaSerializer, SalaLoungeSerializer, 
     PeriqueraSerializer, CarpaSerializer, PistaTarimaSerializer, ExtraSerializer, EventoSerializer, DegustacionSerializer,
-    ProductSerializer, CalendarActivitySerializer, NotificationSerializer, HomeSectionSerializer, HomeSectionImageSerializer
+    ProductSerializer, CalendarActivitySerializer, NotificationSerializer, HomeSectionSerializer, HomeSectionImageSerializer, InvitationSerializer
 )
 
 # 💡 Importación ÚNICA Y CORRECTA de datetime
@@ -184,7 +184,18 @@ class EventoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('mobiliario_asignado__content_object')
+        queryset = super().get_queryset().prefetch_related('mobiliario_asignado__content_object')
+        
+        tipo_evento = self.request.query_params.get('tipo_evento')
+        if tipo_evento:
+            queryset = queryset.filter(tipo_evento_id=tipo_evento)
+            
+        ordering = self.request.query_params.get('ordering')
+        if ordering:
+            # simple ordering via explicit parameter or DRF OrderingFilter
+            queryset = queryset.order_by(ordering)
+            
+        return queryset
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):
@@ -1247,3 +1258,8 @@ class HomeSectionViewSet(viewsets.ModelViewSet):
             return Response({'status': 'Image deleted'})
         except HomeSectionImage.DoesNotExist:
             return Response({'error': 'Image not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class InvitationViewSet(viewsets.ModelViewSet):
+    queryset = Invitation.objects.all()
+    serializer_class = InvitationSerializer
+    permission_classes = [IsAuthenticated]

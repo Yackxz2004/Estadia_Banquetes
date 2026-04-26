@@ -125,8 +125,9 @@ function Degustaciones() {
           </tbody>
         </table>
       </div>
+    
+      <Link to="/inventory" className="back-link" style={{ marginTop: "20px", display: "inline-block" }}>Volver a Inventario</Link>
     </div>
   );
-}
-
+};
 export default Degustaciones;

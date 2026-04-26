@@ -114,15 +114,13 @@ function Eventos() {
                         to={`/inventory/eventos/${evento.id}`} 
                         className="action-btn edit-btn"
                       >
-                        <FiEdit2 size={16} />
-                        <span>Editar</span>
+                        <FiEdit2 size={18} />
                       </Link>
                       <button
                         onClick={() => handleDelete(evento.id)}
                         className="action-btn delete-btn"
                       >
-                        <FiTrash2 size={16} />
-                        <span>Eliminar</span>
+                        <FiTrash2 size={18} />
                       </button>
                     </div>
                   </td>
@@ -138,8 +136,9 @@ function Eventos() {
           </tbody>
         </table>
       </div>
+    
+      <Link to="/inventory" className="back-link" style={{ marginTop: "20px", display: "inline-block" }}>Volver a Inventario</Link>
     </div>
   );
-}
-
+};
 export default Eventos;

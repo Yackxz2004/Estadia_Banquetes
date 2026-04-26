@@ -353,3 +353,17 @@ class HomeSectionImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.section.name} - {self.caption or 'No caption'}"
+
+class Invitation(models.Model):
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField(blank=True, null=True)
+    festejados = models.CharField(max_length=200)
+    fecha = models.DateField()
+    hora = models.TimeField()
+    lugar = models.CharField(max_length=200)
+    direccion = models.CharField(max_length=300)
+    mensaje = models.TextField()
+    theme = models.CharField(max_length=50, default='pink')
+    
+    def __str__(self):
+        return self.titulo
